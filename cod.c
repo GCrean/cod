@@ -34,8 +34,14 @@ static void* allocate(size_t size) {
 
 cod_image* cod_pixels;
 
-#define cod_error(fmt, ...) snprintf(error_buffer, COD_BUFFER_SIZE, "cod: "fmt, __VA_ARGS__)
-#define cod_error0(fmt) snprintf(error_buffer, COD_BUFFER_SIZE, "cod: "fmt)
+// Get the offset of an (x,y) coordinate pair in a one-dimensional
+// array: (y * width) + x
+#define COD_ARRAY_OFFSET(x, y, width) (((y) * (width)) + x)
+#define COD_MAX(a,b) (((a) > (b)) ? (a) : (b))
+#define COD_MIN(a,b) (((a) > (b)) ? (b) : (a))
+
+#define COD_ERROR(fmt, ...) snprintf(error_buffer, COD_BUFFER_SIZE, "cod: "fmt, __VA_ARGS__)
+#define COD_ERROR0(fmt) snprintf(error_buffer, COD_BUFFER_SIZE, "cod: "fmt)
 
 const char* cod_get_error() { return (const char*) error_buffer; }
 
@@ -53,7 +59,7 @@ cod_image* cod_load_image(const char* path) {
   unsigned char* data = stbi_load(path, &width, &height, &components, 4);
 
   if(!data) {
-    cod_error("stbi_load failed to load \"%s\": %s ", path, stbi_failure_reason());
+    COD_ERROR("stbi_load failed to load \"%s\": %s ", path, stbi_failure_reason());
     return NULL;
   }
 
@@ -71,18 +77,49 @@ void cod_free_image(cod_image* image) {
   free(image);
 }
 
-void cod_blit_image(cod_image* image, int src_x, int src_y) {
-  for(int y = 0; y < image->height; y++) {
-    for(int x = 0; x < image->width; x++) {
-      // Calculate the offset of our two dimensions in the linear pixel array
-      int screen_offset = ((y + src_y) * cod_window_width) + (x + src_x);
-      // We do the same thing here, but multiply by 4 because stbi_load returns an array of RGBA values
-      int image_offset = ((y * image->width) + x);
-      cod_pixels->data[screen_offset].r = image->data[image_offset].r;
-      cod_pixels->data[screen_offset].g = image->data[image_offset].g;
-      cod_pixels->data[screen_offset].b = image->data[image_offset].b;
-      // If the image has an alpha channel, use its value, otherwise, just make it opaque
-      cod_pixels->data[screen_offset].a = image->data[image_offset].a;
+void cod_draw_image_ext(cod_image* src, int src_x, int src_y, int width, int height, 
+		    cod_image* dst, int dst_x, int dst_y) {
+
+  if(!width) width = src->width;
+  if(!height) height = src->height;
+
+  // Here we truncate the dimensions of the image if it extends over
+  // the borders of the source or destination
+  width = COD_MIN(dst->width - dst_x, COD_MIN(src->width - src_x, width));
+  height = COD_MIN(dst->height - dst_y, COD_MIN(src->height - src_y, height));
+  /*
+  if(src_x + width > src->width) {
+    width = src->width - src_x;
+  }
+
+  if(src_y + height > src->height) {
+    height = src->height - src_y;
+  }
+
+  if(dst_x + width > dst->width) {
+    width = dst->width - dst_x;
+  }
+
+  if(dst_y + height > dst->height) {
+    height = dst->height - dst_y;
+  }
+  */
+
+  for(int x = 0; x < width; x++) {
+    for(int y = 0; y < height; y++) {
+      int src_offset = COD_ARRAY_OFFSET(src_x + x, src_y + y, src->width);
+      int dst_offset = COD_ARRAY_OFFSET(dst_x + x, dst_y + y, dst->width);
+      dst->data[dst_offset] = src->data[src_offset];
+    }
+  }
+}
+
+void cod_draw_image(cod_image* image, int src_x, int src_y) {
+  for(int x = 0; x < image->width; x++) {
+    for(int y = 0; y < image->height; y++) {
+      int screen_offset = COD_ARRAY_OFFSET(x + src_x, y + src_y, cod_window_width);
+      int image_offset = COD_ARRAY_OFFSET(x, y, image->width);
+      cod_pixels->data[screen_offset] = image->data[image_offset];
     }
   }
 }
@@ -116,8 +153,7 @@ static void _cod_open(int width, int height) {
 
 static void _cod_close() {
   if(cod_pixels) {
-    free(cod_pixels->data);
-    free(cod_pixels);
+    cod_free_image(cod_pixels);
   }
 }
 
@@ -153,14 +189,14 @@ int cod_open(int width, int height) {
 
   // Acquire display information
   if((display = XOpenDisplay(0)) == NULL) {
-    cod_error0("x11: XOpenDisplay failed");
+    COD_ERROR0("x11: XOpenDisplay failed");
     return 0;
   }
 
   int screen = DefaultScreen(display);
   Visual* visual = DefaultVisual(display, screen);
   if(!visual) {
-    cod_error0("x11: DefaultVisual failed");
+    COD_ERROR0("x11: DefaultVisual failed");
   }
 
   Window root = DefaultRootWindow(display);
@@ -182,7 +218,7 @@ int cod_open(int width, int height) {
 			 &attributes);
 
   if(!window) {
-    cod_error0("x11: XCreateWindow failed");
+    COD_ERROR0("x11: XCreateWindow failed");
     return 0;
   }
 
@@ -191,12 +227,12 @@ int cod_open(int width, int height) {
   wm_delete_window = XInternAtom(display, "WM_DELETE_WINDOW", True);
 
   if(!wm_delete_window) {
-    cod_error0("x11: XInternAtom failed");
+    COD_ERROR0("x11: XInternAtom failed");
     return 0;
   }
 
   if(!XSetWMProtocols(display, window, &wm_delete_window, 1)) {
-    cod_error0("x11: XSetWMProtocols failed");
+    COD_ERROR0("x11: XSetWMProtocols failed");
     return 0;
   }
 
@@ -215,7 +251,7 @@ int cod_open(int width, int height) {
 		       cod_window_width, cod_window_height, 32, cod_window_width * cod_bytes_per_pixel);
 
   if(!image) {
-    cod_error0("x11: XCreateImage failed");
+    COD_ERROR0("x11: XCreateImage failed");
     return 0;
   }
 
@@ -281,9 +317,10 @@ int cod_get_event(cod_event* event) {
   return 0;
 }
 
-void cod_draw() {
-  for(int y = 0; y < cod_window_height; y++) {
-    for(int x = 0; x < cod_window_width; x++) {
+void cod_swap() {
+  // Convert RGBA to BGRA for x, then blit to screen
+  for(int x = 0; x < cod_window_width; x++) {
+    for(int y = 0; y < cod_window_height; y++) {
       int cod_offset = (y * cod_window_width) + x;
       int x_offset = cod_offset * 4;
       x_pixels[x_offset] = cod_pixels->data[cod_offset].b;

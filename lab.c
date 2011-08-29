@@ -55,9 +55,10 @@ int main(void) {
 
     cod_clear();
 
-    cod_blit_image(cat, 50, 50);
+    cod_draw_image_ext(cat, 0, 0, 0, 0,
+		       cod_pixels, 50, 50);
 
-    cod_draw();
+    cod_swap();
   }
 
   cod_free_image(cat);

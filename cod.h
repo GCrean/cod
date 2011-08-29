@@ -49,13 +49,14 @@ void cod_close();
 // Sleeps for MICROSECONDS
 void cod_sleep(int microseconds);
 
-void cod_draw();
+void cod_swap();
 void cod_clear();
 
 cod_image* cod_load_image(const char* path);
 void cod_free_image(cod_image*);
-void cod_blit_image_ext(cod_image* image, int src_x, int src_y, int dest_x, int dest_y);
-void cod_blit_image(cod_image* image, int dest_x, int dest_y);
+void cod_draw_image_ext(cod_image* src, int src_x, int src_y, int width, 
+			int height, cod_image* dst, int dst_x, int dst_y);
+void cod_draw_image(cod_image* image, int dst_x, int dst_y);
 
 // Bitmap fonts
 cod_font* cod_load_font(const char* path, int width, int height);
