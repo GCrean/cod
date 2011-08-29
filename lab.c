@@ -40,7 +40,9 @@ int main(void) {
   }
 
   cod_event e;
-  
+
+  int update = 1;
+
   while(running) {
     while(cod_get_event(&e)) {
       switch(e.type) {
@@ -51,12 +53,13 @@ int main(void) {
     }
 
     // Yield to CPU
-    cod_sleep(50);
+    cod_sleep(50000);
+    if(update) {
+      cod_clear();
 
-    cod_clear();
-
-    cod_draw_image_ext(cat, 0, 0, 0, 0,
-		       cod_pixels, 50, 50);
+      cod_simple_draw_image(cat, 50, 50);
+      update = 0;
+    }
 
     cod_swap();
   }

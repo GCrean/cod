@@ -21,9 +21,10 @@
 #endif
 
 #define COD_BUFFER_SIZE 512
+#define COD_BYTES_PER_PIXEL sizeof(cod_pixel)
 
 // Internal stuff
-int cod_window_width = 0, cod_window_height = 0, cod_bytes_per_pixel;
+int cod_window_width = 0, cod_window_height = 0  ;
 static char error_buffer[COD_BUFFER_SIZE];
 
 static void* allocate(size_t size) {
@@ -77,7 +78,7 @@ void cod_free_image(cod_image* image) {
   free(image);
 }
 
-void cod_draw_image_ext(cod_image* src, int src_x, int src_y, int width, int height, 
+void cod_draw_image(cod_image* src, int src_x, int src_y, int width, int height, 
 		    cod_image* dst, int dst_x, int dst_y) {
 
   if(!width) width = src->width;
@@ -87,6 +88,7 @@ void cod_draw_image_ext(cod_image* src, int src_x, int src_y, int width, int hei
   // the borders of the source or destination
   width = COD_MIN(dst->width - dst_x, COD_MIN(src->width - src_x, width));
   height = COD_MIN(dst->height - dst_y, COD_MIN(src->height - src_y, height));
+
   /*
   if(src_x + width > src->width) {
     width = src->width - src_x;
@@ -105,6 +107,16 @@ void cod_draw_image_ext(cod_image* src, int src_x, int src_y, int width, int hei
   }
   */
 
+  printf("%d\n", width);
+
+  // I wonder which one is faster?
+  for(int y = 0; y < height; y++) {
+    int src_offset = COD_ARRAY_OFFSET(src_x, src_y + y, src->width);
+    int dst_offset = COD_ARRAY_OFFSET(dst_x, dst_y + y, dst->width);
+    memcpy(dst->data + dst_offset, src->data + src_offset, width * sizeof(cod_pixel));
+  }
+
+  /*
   for(int x = 0; x < width; x++) {
     for(int y = 0; y < height; y++) {
       int src_offset = COD_ARRAY_OFFSET(src_x + x, src_y + y, src->width);
@@ -112,16 +124,25 @@ void cod_draw_image_ext(cod_image* src, int src_x, int src_y, int width, int hei
       dst->data[dst_offset] = src->data[src_offset];
     }
   }
+  */
 }
 
-void cod_draw_image(cod_image* image, int src_x, int src_y) {
+void cod_simple_draw_image(cod_image* image, int dst_x, int dst_y) {
+  for(int y = 0; y < image->height; y++) {
+    int screen_offset = COD_ARRAY_OFFSET(dst_x, y + dst_y, cod_window_width);
+    int image_offset = COD_ARRAY_OFFSET(0, y, image->width);
+    memcpy(cod_pixels->data + screen_offset, image->data + image_offset, image->width * sizeof(cod_pixel));
+  }
+
+  /*
   for(int x = 0; x < image->width; x++) {
     for(int y = 0; y < image->height; y++) {
-      int screen_offset = COD_ARRAY_OFFSET(x + src_x, y + src_y, cod_window_width);
+      int screen_offset = COD_ARRAY_OFFSET(x + dst_x, y + dst_y, cod_window_width);
       int image_offset = COD_ARRAY_OFFSET(x, y, image->width);
       cod_pixels->data[screen_offset] = image->data[image_offset];
     }
   }
+  */
 }
 
 void cod_clear(void) {
@@ -245,10 +266,9 @@ int cod_open(int width, int height) {
   XFree(sizehints);  
 
   // Create image that we will draw to
-  cod_bytes_per_pixel = sizeof(cod_pixel);
   gc = DefaultGC(display, screen);
   image = XCreateImage(display, CopyFromParent, display_depth, ZPixmap, 0, NULL,
-		       cod_window_width, cod_window_height, 32, cod_window_width * cod_bytes_per_pixel);
+		       cod_window_width, cod_window_height, 32, cod_window_width * COD_BYTES_PER_PIXEL);
 
   if(!image) {
     COD_ERROR0("x11: XCreateImage failed");
@@ -318,7 +338,7 @@ int cod_get_event(cod_event* event) {
 }
 
 void cod_swap() {
-  // Convert RGBA to BGRA for x, then blit to screen
+  // Convert RGBA to BGRA for x (cause apparently that's what it wants?), then write to screen
   for(int x = 0; x < cod_window_width; x++) {
     for(int y = 0; y < cod_window_height; y++) {
       int cod_offset = (y * cod_window_width) + x;
