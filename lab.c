@@ -3,20 +3,6 @@
 
 #include "cod.h"
 
-#if 0
-#define STBI_NO_HDR
-#if defined(__clang__)
-# pragma clang diagnostic push
-# pragma clang diagnostic ignored "-Wall"
-# pragma clang diagnostic ignored "-Wextra"
-# pragma clang diagnostic ignored "-Wunused-function"
-#endif
-#include "stb_image.c"
-#if defined(__clang__)
-# pragma clang diagnostic pop
-#endif
-#endif
-
 void fail() {
   printf("%s\n", cod_get_error());
   exit(EXIT_FAILURE);
@@ -34,21 +20,32 @@ int main(void) {
   // if this is run from the examples/ directory instead of the
   // toplevel cod directory, we'll need to load it from the current directory
   if(!cat) {
+    cod_clear_error();
     cat = cod_load_image("cat.png");
     if(!cat)
       fail();
   }
 
+  cod_font* font = cod_load_font("DroidSansMono-16px.fnt", "DroidSansMono-16px_0.png");
+  if(!font) 
+    fail();
+
+  cod_pixel white = { 255, 255, 255, 255 };
+
+  cod_image* img = cod_draw_text(font, "Howdy doody", white);
+
   cod_event e;
 
-  int update = 1;
-
+  int update = 0;
+  cod_draw_image(cat, 0, 0, 0, 0, cod_pixels, 0, 0);
+  cod_draw_image(img, 0, 0, 0, 0, cod_pixels, 50, 200);
+  
   while(running) {
     while(cod_get_event(&e)) {
       switch(e.type) {
       case COD_QUIT:
-	running = 0;
-	break;
+        running = 0;
+        break;
       }
     }
 
@@ -57,13 +54,16 @@ int main(void) {
     if(update) {
       cod_clear();
 
-      cod_simple_draw_image(cat, 50, 50);
+      //cod_simple_draw_image(img, 0, 0);
+      //cod_draw_image(cat, 0, 0, 0, 0, cod_pixels, 0, 0);
       update = 0;
     }
 
     cod_swap();
   }
 
+  cod_free_image(img);
+  cod_free_font(font);
   cod_free_image(cat);
 
   cod_close();

@@ -1,11 +1,11 @@
 ## Build flags
 CFLAGS := -g3 
-CPPFLAGS := -std=c99 -DCOD_PLATFORM=COD_X11 -Wall -Wextra $(shell pkg-config --cflags x11)
+CPPFLAGS := -I. -std=c99 -DCOD_PLATFORM=COD_X11 -Wall -Wextra $(shell pkg-config --cflags x11)
 LDFLAGS := $(shell pkg-config --libs x11) 
 
 ## Build variables
 EXE := lab
-SRC := lab cod
+SRC := cod
 SRC := $(foreach x,$(SRC),$(x).c)
 OBJ := $(patsubst %.c,.%.o, $(SRC))
 DEP := $(patsubst %.c,.%.d, $(SRC))
@@ -23,13 +23,16 @@ DEP := $(patsubst %.c,.%.d, $(SRC))
 	$(strip $(CC) $(CPPFLAGS) $(CFLAGS) -c -o $@ $<)
 
 ## Targets
-all: $(EXE)
+all: examples/image examples/skeleton $(EXE)
 
 -include $(DEP)
 
+examples/image: $(OBJ)
+examples/skeleton: $(OBJ)
+
 $(EXE): $(OBJ)
 	@echo -n ' LD  ';
-	$(strip $(CC) $(CFLAGS) $(LDFLAGS) -o $@ $(OBJ))
+	$(strip $(CC) $(CFLAGS) $(LDFLAGS) -o $@ $(OBJ) lab.c)
 
 ## Utilities
 .PHONY: clean cleaner
