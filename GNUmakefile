@@ -30,7 +30,7 @@ all: examples/image examples/skeleton $(EXE)
 examples/image: $(OBJ)
 examples/skeleton: $(OBJ)
 
-$(EXE): $(OBJ)
+$(EXE): $(OBJ) lab.c
 	@echo -n ' LD  ';
 	$(strip $(CC) $(CFLAGS) $(LDFLAGS) -o $@ $(OBJ) lab.c)
 

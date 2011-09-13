@@ -26,19 +26,12 @@ int main(void) {
       fail();
   }
 
-  cod_font* font = cod_load_font("DroidSansMono-16px.fnt", "DroidSansMono-16px_0.png");
-  if(!font) 
-    fail();
-
   cod_pixel white = { 255, 255, 255, 255 };
-
-  cod_image* img = cod_draw_text(font, "Howdy doody", white);
 
   cod_event e;
 
   int update = 0;
   cod_draw_image(cat, 0, 0, 0, 0, cod_pixels, 0, 0);
-  cod_draw_image(img, 0, 0, 0, 0, cod_pixels, 50, 200);
   
   while(running) {
     while(cod_get_event(&e)) {
@@ -51,19 +44,16 @@ int main(void) {
 
     // Yield to CPU
     cod_sleep(50000);
+
     if(update) {
       cod_clear();
 
-      //cod_simple_draw_image(img, 0, 0);
-      //cod_draw_image(cat, 0, 0, 0, 0, cod_pixels, 0, 0);
       update = 0;
     }
 
     cod_swap();
   }
 
-  cod_free_image(img);
-  cod_free_font(font);
   cod_free_image(cat);
 
   cod_close();
