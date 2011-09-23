@@ -1,6 +1,7 @@
 // common.c -- misc. code
 
 #include <assert.h>
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
@@ -50,4 +51,15 @@ void _cod_close() {
 // Clear screen to black
 void cod_clear(void) {
   memset(cod_pixels->data, 0, cod_pixels->width * cod_pixels->height * 4);
+}
+
+static char* key_names[] = {
+#define COD_KEY_DECL(X) #X,
+  COD_DECLARE_KEYS(COD_KEY_DECL)
+  "COD_KEY_UNKNOWN"
+#undef COD_KEY_DECL
+};
+
+const char* cod_key_name(cod_key key) {
+  return key_names[key];
 }

@@ -97,7 +97,7 @@ void cod_draw_over_image(cod_image* src, int src_x, int src_y, int width,
   for(int y = 0; y < height; y++) {
     int src_offset = COD_IMAGE_OFFSET(src_x, src_y + y, src->width);
     int dst_offset = COD_IMAGE_OFFSET(dst_x, dst_y + y, dst->width);
-    memcpy(dst->data + dst_offset, src->data + src_offset, width * sizeof(cod_pixel));
+    memcpy(dst->data + dst_offset, src->data + src_offset, width * COD_BYTES_PER_PIXEL);
   }
 }
 

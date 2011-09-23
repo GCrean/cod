@@ -1,6 +1,7 @@
 *.[dao]
 /examples/image
 /examples/skeleton
+/examples/events
 /site.mk
 /tmp
 /lab

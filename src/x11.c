@@ -38,8 +38,6 @@ int cod_open(int width, int height) {
 
   // Get display depth
   int display_depth = DefaultDepth(display, screen);
-  
-
 
   // Create the window 
 
@@ -137,17 +135,126 @@ void cod_close() {
   }
 }
 
+static cod_key translate_button(int button) {
+  switch(button) {
+    case Button1: return COD_MOUSE_LEFT;
+    case Button2: return COD_MOUSE_MIDDLE;
+    case Button3: return COD_MOUSE_RIGHT;
+    case Button4: return COD_MOUSE_WHEELUP;
+    case Button5: return COD_MOUSE_WHEELDOWN;
+    default: return COD_KEY_UNKNOWN;
+  }
+}
+
+static void set_button(cod_event* cevent, XEvent* xevent) {
+  cevent->data.key_down.x = xevent->xmotion.x;
+  cevent->data.key_down.y = xevent->xmotion.y;
+  cevent->data.key_down.key = translate_button(xevent->xbutton.button);
+
+}
+
+static cod_key translate_key(XEvent* xevent) {
+  KeySym keysym = XLookupKeysym(&xevent->xkey, 0);
+  switch(keysym) {
+    case XK_a: return COD_KEY_A;
+    case XK_b: return COD_KEY_B;
+    case XK_c: return COD_KEY_C;
+    case XK_d: return COD_KEY_D;
+    case XK_e: return COD_KEY_E;
+    case XK_f: return COD_KEY_F;
+    case XK_g: return COD_KEY_G;
+    case XK_h: return COD_KEY_H;
+    case XK_i: return COD_KEY_I;
+    case XK_j: return COD_KEY_J;
+    case XK_k: return COD_KEY_K;
+    case XK_l: return COD_KEY_L;
+    case XK_m: return COD_KEY_M;
+    case XK_n: return COD_KEY_N;
+    case XK_o: return COD_KEY_O;
+    case XK_p: return COD_KEY_P;
+    case XK_q: return COD_KEY_Q;
+    case XK_r: return COD_KEY_R;
+    case XK_s: return COD_KEY_S;
+    case XK_t: return COD_KEY_T;
+    case XK_u: return COD_KEY_U;
+    case XK_v: return COD_KEY_V;
+    case XK_w: return COD_KEY_W;
+    case XK_x: return COD_KEY_X;
+    case XK_y: return COD_KEY_Y;
+    case XK_0: return COD_KEY_0;
+    case XK_1: return COD_KEY_1;
+    case XK_2: return COD_KEY_2;
+    case XK_3: return COD_KEY_3;
+    case XK_4: return COD_KEY_4;
+    case XK_5: return COD_KEY_5;
+    case XK_6: return COD_KEY_6;
+    case XK_7: return COD_KEY_7;
+    case XK_8: return COD_KEY_8;
+    case XK_9: return COD_KEY_9;
+    case XK_Left: return COD_KEY_LEFT_ARROW;
+    case XK_Up: return COD_KEY_UP_ARROW;
+    case XK_Down: return COD_KEY_DOWN_ARROW;
+    case XK_Right: return COD_KEY_RIGHT_ARROW;
+#define _(a, b) case XK_##a: return COD_KEY_##b
+      _(Control_L, LEFT_CONTROL);
+      _(Control_R, RIGHT_CONTROL);
+      _(Shift_L, LEFT_SHIFT);
+      _(Shift_R, RIGHT_SHIFT);
+      _(Alt_L, LEFT_ALT);
+      // Doesnt seem to work, getting 65027, 0xfe07 or XK_ISO_Level3_Shift apparently
+      _(Alt_R, RIGHT_ALT);
+      _(Return, ENTER);
+      _(BackSpace, BACKSPACE);
+      _(semicolon, SEMICOLON);
+      _(comma, COMMA);
+      _(period, PERIOD);
+      _(slash, SLASH);
+      _(backslash, BACKSLASH);
+      _(apostrophe, APOSTROPHE);
+      _(bracketleft, LEFT_BRACKET);
+      _(bracketright, RIGHT_BRACKET);
+      _(minus, MINUS);
+      _(equal, EQUAL);
+      _(space, SPACE);
+      _(Super_L, SUPER_L);
+      _(Tab, TAB);
+      _(Caps_Lock, CAPS_LOCK);
+      _(grave, GRAVE);
+#undef _
+      
+    default: return COD_KEY_UNKNOWN;
+  }
+
+}
+
 int cod_get_event(cod_event* cevent) {
+  memset(cevent, 0, sizeof(cod_event));
   XEvent xevent;
 
   if(XPending(display)) {
     XNextEvent(display, &xevent);
     switch(xevent.type) {
-    case ClientMessage:
-      cevent->type = COD_QUIT;
-      return 1;
-    default:
-      break;
+      case ButtonPress:
+        cevent->type = COD_KEY_DOWN;
+        set_button(cevent, &xevent);
+        return 1;
+      case ButtonRelease:
+        cevent->type = COD_KEY_UP;
+        set_button(cevent, &xevent);
+        return 1;
+      case KeyPress:
+        cevent->type = COD_KEY_DOWN;
+        cevent->data.key_down.key = translate_key(&xevent);
+        return 1;
+      case KeyRelease:
+        cevent->type = COD_KEY_UP;
+        cevent->data.key_down.key = translate_key(&xevent);
+        return 1;
+      case ClientMessage:
+        cevent->type = COD_QUIT;
+        return 1;
+      default:
+        break;
     }
   }
 

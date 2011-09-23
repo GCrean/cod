@@ -23,12 +23,12 @@ src/.%.o: src/%.c
 	@echo -n ' CC  ';
 	$(strip $(CC) $(CPPFLAGS) $(CFLAGS) -c -o $@ $<)
 
-examples/%: examples/%.c | $(OUT)
+examples/%: examples/%.c $(OUT)
 	@echo -n ' LD  ';
-	$(strip $(CC) $(CPPFLAGS) $(CFLAGS) -o $@ $^ $(LDFLAGS) -L. -lcod)
+	$(strip $(CC) $(CPPFLAGS) $(CFLAGS) -o $@ $< $(LDFLAGS) -L. -lcod)
 
 ## Targets
-all: examples/skeleton examples/image lab
+all: examples/events examples/skeleton examples/image lab
 
 -include $(DEP)
 

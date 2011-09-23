@@ -31,9 +31,11 @@ int main(void) {
   while(running) {
     while(cod_get_event(&e)) {
       switch(e.type) {
-      case COD_QUIT:
-	running = 0;
-	break;
+        case COD_QUIT:
+          running = 0;
+          break;
+        default: 
+          break;
       }
     }
 
