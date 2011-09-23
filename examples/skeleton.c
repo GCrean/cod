@@ -27,8 +27,6 @@ int main(void) {
       }
     }
 
-    cod_sleep(10000);
-
     cod_swap();
   }
   

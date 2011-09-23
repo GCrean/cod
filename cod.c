@@ -4,6 +4,8 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include <math.h>
+
 #include "cod.h"
 
 // Constants
@@ -134,6 +136,7 @@ void cod_draw_image(cod_image* src, int src_x, int src_y, int width,
       dstp->r = ((srcp->r * alpha) + (dstp->r * inverse_alpha)) >> 8;
       dstp->g = ((srcp->g * alpha) + (dstp->g * inverse_alpha)) >> 8;
       dstp->b = ((srcp->b * alpha) + (dstp->b * inverse_alpha)) >> 8;
+      dstp->a = srcp->a;
 
       ++src_offset;
       ++dst_offset;
@@ -244,7 +247,7 @@ cod_font* cod_load_font(const char* fnt_path, const char* png_path) {
 #define COD_GET_CHAR(font, c) font->chars[((int)(c))-32]
 
 void cod_size_text(cod_font* font, int* width, int* height, const char* text) {
-  char c;
+  char c=0;
   int w=0,h=0;
   while((c = *text++)) {
     cod_char* ch = &COD_GET_CHAR(font, c);
@@ -255,26 +258,59 @@ void cod_size_text(cod_font* font, int* width, int* height, const char* text) {
   (*height) = h;
 }
 
-cod_image* cod_draw_text(cod_font* font, const char* text, cod_pixel fg) {
-  int w = 0, h = 0;
-  cod_image* image = 0;
-  char c = 0;
+static void cod_draw_char(cod_image* src, int src_x, int src_y, int width,
+                          int height, cod_image* dst, int dst_x, int dst_y,
+                          cod_pixel fg) {
 
-  cod_size_text(font, &w, &h, text);
+  if(!width) width = src->width;
+  if(!height) height = src->height;
 
-  image = cod_make_image(w, h);
+  // Here we truncate the dimensions of the image if it extends over
+  // the borders of the source or destination
+  width = COD_MIN(dst->width - dst_x, COD_MIN(src->width - src_x, width));
+  height = COD_MIN(dst->height - dst_y, COD_MIN(src->height - src_y, height));
 
-  int x=0;
+  for(int y = 0; y < height; y++) {
+    int src_offset = COD_IMAGE_OFFSET(src_x, src_y + y, src->width);
+    int dst_offset = COD_IMAGE_OFFSET(dst_x, dst_y + y, dst->width);
+    for(int x = 0; x < width; x++) {
+      cod_pixel* dstp = dst->data + dst_offset;
+      cod_pixel* srcp = src->data + src_offset;
+      
+      // Wow, I'm really not sure about any of this.
+      int alpha = (srcp->r + srcp->g + srcp->b) / 3;
+      int inverse_alpha = 256 - alpha;
+
+      int tint_r = ((fg.r) / 255) * srcp->r;
+      int tint_g = ((fg.g) / 255) * srcp->g;
+      int tint_b = ((fg.b) / 255) * srcp->b;
+
+      dstp->r = ((tint_r * alpha) + (dstp->r * inverse_alpha)) >> 8;
+      dstp->g = ((tint_g * alpha) + (dstp->g * inverse_alpha)) >> 8;
+      dstp->b = ((tint_b * alpha) + (dstp->b * inverse_alpha)) >> 8;
+      
+      if(srcp->a != 255)
+        printf("%d\n", srcp->a);
+
+      ++src_offset;
+      ++dst_offset;
+    }
+  }
+}
+
+void cod_draw_text_at(cod_font* font, const char* text, cod_pixel fg,
+                            cod_image *target, int dstx, int dsty) {
+  int x = 0, c = 0;
 
   while((c = *text++)) {
     cod_char* ch = &COD_GET_CHAR(font, c);
 
-    cod_draw_over_image(font->image, ch->x, ch->y, ch->width, ch->height, image, x + ch->xoffset, ch->yoffset);
+    cod_draw_char(font->image, ch->x, ch->y, ch->width, ch->height, target, dstx + x + ch->xoffset, dsty + ch->yoffset, fg);
 
     x += ch->xadvance;
   }
   
-  return image;
+  //return image;
 }
 
 void cod_simple_draw_text(cod_font* font, int width, int height, const char* text) {

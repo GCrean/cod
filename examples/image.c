@@ -37,13 +37,11 @@ int main(void) {
       }
     }
 
-    // Yield to CPU
     cod_clear();
 
     cod_simple_draw_image(cat, 50, 50);
 
     cod_swap();
-    cod_sleep(10000);
   }
 
   cod_free_image(cat);

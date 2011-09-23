@@ -1,7 +1,7 @@
 ## Build flags
 CFLAGS := -g3 
 CPPFLAGS := -I. -std=c99 -DCOD_PLATFORM=COD_X11 -Wall -Wextra $(shell pkg-config --cflags x11)
-LDFLAGS := $(shell pkg-config --libs x11) 
+LDFLAGS := $(shell pkg-config --libs x11) -lm
 
 ## Build variables
 EXE := lab
@@ -22,24 +22,31 @@ DEP := $(patsubst %.c,.%.d, $(SRC))
 	@echo -n ' CC  ';
 	$(strip $(CC) $(CPPFLAGS) $(CFLAGS) -c -o $@ $<)
 
+LINK = $(strip $(CC) $(CPPFLAGS) $(CFLAGS) $(LDFLAGS) -o $@ $^)
+
 ## Targets
 all: examples/image examples/skeleton $(EXE)
 
 -include $(DEP)
 
-examples/image: $(OBJ)
-examples/skeleton: $(OBJ)
+examples/image: $(OBJ) examples/image.c
+	@echo -n ' LD  ';
+	$(call LINK)
+
+examples/skeleton: $(OBJ) examples/skeleton.c
+	@echo -n ' LD  ';
+	$(call LINK)
 
 $(EXE): $(OBJ) lab.c
 	@echo -n ' LD  ';
-	$(strip $(CC) $(CFLAGS) $(LDFLAGS) -o $@ $(OBJ) lab.c)
+	$(call LINK)
 
 ## Utilities
 .PHONY: clean cleaner
 
 clean:
 	@echo -n ' RM  ';
-	rm -f $(wildcard $(OBJ) $(EXE))
+	rm -f $(wildcard $(OBJ) $(EXE) examples/image examples/skeleton .lab.o .lab.d)
 
 cleaner: clean
 	@echo -n ' RM  ';
