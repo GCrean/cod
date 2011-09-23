@@ -5,48 +5,47 @@ LDFLAGS := $(shell pkg-config --libs x11) -lm
 
 ## Build variables
 EXE := lab
+OUT := libcod.a
 SRC := cod
-SRC := $(foreach x,$(SRC),$(x).c)
-OBJ := $(patsubst %.c,.%.o, $(SRC))
-DEP := $(patsubst %.c,.%.d, $(SRC))
+SRC := $(foreach x,$(SRC),src/$(x).c)
+OBJ := $(patsubst src/%.c,src/.%.o, $(SRC))
+DEP := $(patsubst src/%.c,src/.%.d, $(SRC))
 
 ## Local settings
 -include site.mk
 
 ## Patterns
-.%.d: %.c
+src/.%.d: %.c
 	@echo -n ' MM  ';
 	$(strip $(CC) $(CPPFLAGS) -MM $< -MT $(patsubst %.d,%.o,$@) > $@)
 
-.%.o: %.c
+src/.%.o: src/%.c
 	@echo -n ' CC  ';
 	$(strip $(CC) $(CPPFLAGS) $(CFLAGS) -c -o $@ $<)
 
-LINK = $(strip $(CC) $(CPPFLAGS) $(CFLAGS) $(LDFLAGS) -o $@ $^)
+examples/%: examples/%.c | $(OUT)
+	@echo -n ' LD  ';
+	$(strip $(CC) $(CPPFLAGS) $(CFLAGS) -o $@ $^ $(LDFLAGS) -L. -lcod)
 
 ## Targets
-all: examples/image examples/skeleton $(EXE)
+all: examples/skeleton examples/image lab
 
 -include $(DEP)
 
-examples/image: $(OBJ) examples/image.c
+lab: lab.c | $(OUT)
 	@echo -n ' LD  ';
-	$(call LINK)
+	$(strip $(CC) $(CPPFLAGS) $(CFLAGS) -o $@ $^ $(LDFLAGS) -L. -lcod)
 
-examples/skeleton: $(OBJ) examples/skeleton.c
-	@echo -n ' LD  ';
-	$(call LINK)
-
-$(EXE): $(OBJ) lab.c
-	@echo -n ' LD  ';
-	$(call LINK)
+$(OUT): $(OBJ)
+	@echo -n ' AR  ';
+	$(strip ar rcs $@ $^)
 
 ## Utilities
 .PHONY: clean cleaner
 
 clean:
 	@echo -n ' RM  ';
-	rm -f $(wildcard $(OBJ) $(EXE) examples/image examples/skeleton .lab.o .lab.d)
+	rm -f $(wildcard $(OBJ) $(EXE) $(OUT) examples/image examples/skeleton)
 
 cleaner: clean
 	@echo -n ' RM  ';

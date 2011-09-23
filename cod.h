@@ -9,6 +9,7 @@ extern "C" {
 
 // Platform enumeration
 #define COD_X11 1
+#define COD_WINDOWS 2
 
 typedef enum {
   COD_QUIT

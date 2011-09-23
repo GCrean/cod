@@ -1,3 +1,4 @@
+// lab.c -- file for experimenting with cod
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -37,8 +38,7 @@ int main(void) {
   cod_draw_image(cat, 0, 0, 0, 0, cod_pixels, 0, 0);
   cod_draw_image(wee, 0, 0, 0, 0, cod_pixels, 50, 50);
   cod_draw_text_at(font, text_to_render, white, cod_pixels, 150, 120);
-  cod_draw_text_at(font, text_to_render, white, cod_pixels, 250, 250);
- 
+  cod_draw_text_at(font, text_to_render, white, cod_pixels, 250, 250); 
 
   while(running) {
     while(cod_get_event(&e)) {
