@@ -7,9 +7,16 @@ extern "C" {
 
 #include <stddef.h>
 
+#ifndef COD_BUFFER_SIZE
+# define COD_BUFFER_SIZE 512
+#endif
+
+// Constants
+#define COD_BYTES_PER_PIXEL sizeof(cod_pixel)
+
 // Platform enumeration
 #define COD_X11 1
-#define COD_WINDOWS 2
+#define COD_WIN32 2
 
 typedef enum {
   COD_QUIT
@@ -51,11 +58,29 @@ extern int cod_window_width, cod_window_height;
 // like. cod_draw() draws this to the screen
 cod_image* cod_pixels;
 
+// Get the offset of an (x,y) coordinate pair in a one-dimensional
+// array: (y * width) + x
+#define COD_IMAGE_OFFSET(x, y, width) (((y) * (width)) + x)
+
+// Return the smaller of two numbers
+#define COD_MIN(a,b) (((a) > (b)) ? (b) : (a))
+#define COD_MAX(a,b) (((a) < (b)) ? (b) : (a))
+
+// Utility macros
+#define COD_ALLOCATE(x) (calloc(1, (x)))
+
+// Errors
+#define COD_ERROR(fmt, ...) snprintf(cod_error_buffer, COD_BUFFER_SIZE, "cod: "fmt, __VA_ARGS__)
+#define COD_ERROR0(fmt) snprintf(cod_error_buffer, COD_BUFFER_SIZE, "cod: "fmt)
+
 // If cod generates an error message, this will return it
 const char* cod_get_error();
 void cod_clear_error();
 
+extern char cod_error_buffer[COD_BUFFER_SIZE];
+
 // Open a window and initializes cod. Returns 0 on failure.
+void _cod_open(int, int);
 int cod_open(int width, int height);
 
 // Draw the buffer to the screen
@@ -72,11 +97,13 @@ void cod_set_title(const char* title);
 int cod_get_event(cod_event* event);
 
 // Shuts down cod
+void _cod_close();
 void cod_close();
 
 // Sleeps for MICROSECONDS
 void cod_sleep(int microseconds);
 
+cod_image* cod_make_image(int width, int height);
 cod_image* cod_load_image(const char* path);
 void cod_free_image(cod_image*);
 void cod_draw_image(cod_image* src, int src_x, int src_y, int width, 
@@ -88,7 +115,8 @@ void cod_simple_draw_image(cod_image* src, int dst_x, int dst_y);
 
 // Bitmap fonts
 cod_font* cod_load_font(const char* fnt_path, const char* png_path);
-cod_image* cod_draw_text(cod_font* font, const char* text, cod_pixel fg);
+void cod_draw_text(cod_font* font, const char* text, cod_pixel fg,
+                   cod_image *target, int dstx, int dsty);
 void cod_size_text(cod_font* font, int* width, int* height, const char* text);
 void cod_free_font(cod_font* font);
 

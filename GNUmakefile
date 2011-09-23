@@ -1,12 +1,12 @@
 ## Build flags
 CFLAGS := -g3 
-CPPFLAGS := -I. -std=c99 -DCOD_PLATFORM=COD_X11 -Wall -Wextra $(shell pkg-config --cflags x11)
+CPPFLAGS := -Isrc -std=c99 -DCOD_PLATFORM=COD_X11 -Wall -Wextra $(shell pkg-config --cflags x11)
 LDFLAGS := $(shell pkg-config --libs x11) -lm
 
 ## Build variables
 EXE := lab
 OUT := libcod.a
-SRC := cod
+SRC := common font image x11
 SRC := $(foreach x,$(SRC),src/$(x).c)
 OBJ := $(patsubst src/%.c,src/.%.o, $(SRC))
 DEP := $(patsubst src/%.c,src/.%.d, $(SRC))
@@ -15,7 +15,7 @@ DEP := $(patsubst src/%.c,src/.%.d, $(SRC))
 -include site.mk
 
 ## Patterns
-src/.%.d: %.c
+src/.%.d: src/%.c
 	@echo -n ' MM  ';
 	$(strip $(CC) $(CPPFLAGS) -MM $< -MT $(patsubst %.d,%.o,$@) > $@)
 

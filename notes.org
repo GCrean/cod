@@ -1,0 +1,8 @@
+notes.org -- todo list
+
+* STARTED Add font support
+* TODO Port to Windows
+* TODO Port to Cocoa
+* TODO Document
+* TODO Kerning support
+* TODO Pre-multiplied alpha blending?
