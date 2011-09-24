@@ -1,4 +1,4 @@
-// events.c - reads and prints events (except mouse motion which is pretty frequent)
+// events.c - reads and prints events
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -29,6 +29,9 @@ int main(void) {
           break;
         case COD_KEY_UP:
           printf("key up key=%s x=%d y=%d\n", cod_key_name(e.data.key_down.key), e.data.key_down.x, e.data.key_down.y);
+          break;
+        case COD_MOUSE_MOTION:
+          printf("mouse motion x=%d y=%d\n", e.data.mouse_motion.x, e.data.mouse_motion.y);
           break;
         default:
           break;

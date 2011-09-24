@@ -253,6 +253,11 @@ int cod_get_event(cod_event* cevent) {
       case ClientMessage:
         cevent->type = COD_QUIT;
         return 1;
+      case MotionNotify:
+        cevent->type = COD_MOUSE_MOTION;
+        cevent->data.mouse_motion.x = xevent.xmotion.x;
+        cevent->data.mouse_motion.y = xevent.xmotion.x;
+        return 1;
       default:
         break;
     }

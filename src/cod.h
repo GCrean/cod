@@ -78,7 +78,8 @@ typedef enum {
   COD_EVENT_UNKNOWN = 0,
   COD_QUIT = 1,
   COD_KEY_DOWN = 2,
-  COD_KEY_UP = 3
+  COD_KEY_UP = 3,
+  COD_MOUSE_MOTION
 } cod_event_type;
 
 // Keys are declared in a macro like this so we can convert them to strings in common.c
@@ -175,6 +176,10 @@ struct cod_event {
       // Actual key
       cod_key key;
     } key_up;
+
+    struct {
+      int x, y;
+    } mouse_motion;
   } data;
 };
 

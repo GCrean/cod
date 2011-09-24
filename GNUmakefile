@@ -33,9 +33,9 @@ all: $(OUT) $(EXAMPLES) lab
 
 -include $(DEP)
 
-lab: lab.c | $(OUT)
+lab: lab.c $(OUT)
 	@echo -n ' LD  ';
-	$(strip $(CC) $(CPPFLAGS) $(CFLAGS) -o $@ $^ $(LDFLAGS))
+	$(strip $(CC) $(CPPFLAGS) $(CFLAGS) -o $@ $< $(LDFLAGS))
 
 $(OUT): $(OBJ)
 	@echo -n ' AR  ';

@@ -63,4 +63,3 @@ static char* key_names[] = {
 const char* cod_key_name(cod_key key) {
   return key_names[key];
 }
-
