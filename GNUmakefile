@@ -1,7 +1,7 @@
 ## Build flags
-CFLAGS := -g3 
+CFLAGS := -g3 -O1
 CPPFLAGS := -Isrc -std=c99 -DCOD_PLATFORM=COD_X11 -Wall -Wextra $(shell pkg-config --cflags x11)
-LDFLAGS := $(shell pkg-config --libs x11) -lm
+LDFLAGS := $(shell pkg-config --libs x11) -L. -lcod
 
 ## Build variables
 EXE := lab
@@ -23,22 +23,26 @@ src/.%.o: src/%.c
 	@echo -n ' CC  ';
 	$(strip $(CC) $(CPPFLAGS) $(CFLAGS) -c -o $@ $<)
 
-examples/%: examples/%.c $(OUT)
+examples/%: examples/%.c
 	@echo -n ' LD  ';
-	$(strip $(CC) $(CPPFLAGS) $(CFLAGS) -o $@ $< $(LDFLAGS) -L. -lcod)
+	$(strip $(CC) $(CPPFLAGS) $(CFLAGS) -o $@ $^ $(LDFLAGS))
 
 ## Targets
-all: examples/events examples/skeleton examples/image lab
+all: $(OUT) examples/events examples/skeleton examples/image lab
 
 -include $(DEP)
 
 lab: lab.c | $(OUT)
 	@echo -n ' LD  ';
-	$(strip $(CC) $(CPPFLAGS) $(CFLAGS) -o $@ $^ $(LDFLAGS) -L. -lcod)
+	$(strip $(CC) $(CPPFLAGS) $(CFLAGS) -o $@ $^ $(LDFLAGS))
 
 $(OUT): $(OBJ)
 	@echo -n ' AR  ';
 	$(strip ar rcs $@ $^)
+
+# Creates amalgamated file of all sources for ease of distribution
+cod.c: $(SRC)
+	cat $^ > $@ && sed -e 's@#include "stb-png.c"@cat src/stb-png.c@e' -i $@
 
 ## Utilities
 .PHONY: clean cleaner

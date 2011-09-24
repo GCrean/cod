@@ -209,6 +209,7 @@ void cod_draw_image(cod_image* src, int src_x, int src_y, int width,
 void cod_draw_over_image(cod_image* src, int src_x, int src_y, int width, 
                          int height, cod_image* dst, int dst_x, int dst_y);
 void cod_simple_draw_image(cod_image* src, int dst_x, int dst_y);
+void cod_simple_draw_image_path(const char* image, int dst_x, int dst_y);
 
 ///// FONTS
 
@@ -238,4 +239,4 @@ void cod_free_font(cod_font* font);
 extern "C" {
 #endif
 
-#endif
+#endif // COD_H

@@ -10,7 +10,7 @@ void fail() {
   exit(EXIT_FAILURE);
 }
 
-void cod_draw_text_at(cod_font* font, const char* text, cod_pixel fg,
+void cod_draw_text2(cod_font* font, const char* text, cod_pixel fg,
                             cod_image *target, int dstx, int dsty);
 
 int main(void) {
@@ -21,10 +21,9 @@ int main(void) {
 
   cod_set_title("cod sample");
 
-  cod_image* cat = cod_load_image("examples/cat.png");
   cod_font* font = cod_load_font("examples/droid/DroidSansMono-16px.fnt", "examples/droid/DroidSansMono-16px_0.png");
 
-  if(!cat ||  !font) {
+  if(!font) {
     fail();
   }
 
@@ -35,16 +34,29 @@ int main(void) {
   const char* text_to_render = "Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod te";
 
   int update = 0;
-  cod_draw_image(cat, 0, 0, 0, 0, cod_pixels, 0, 0);
+  cod_simple_draw_image_path("examples/cat.png", 0, 0);
+  cod_simple_draw_image_path("sprite.png", 50, 50);
+  
+  /*
   cod_draw_text(font, text_to_render, white, cod_pixels, 150, 120);
   cod_draw_text(font, text_to_render, white, cod_pixels, 250, 250); 
+  cod_draw_text2(font, text_to_render, white, cod_pixels, 150, 120+15);
+  cod_draw_text2(font, text_to_render, white, cod_pixels, 250, 250+15); 
+  cod_simple_draw_image_path("pop.png", 100, 100);
 
+  cod_pixel black = { 0, 0, 0, 255 };
+
+  cod_draw_text(font, text_to_render, black, cod_pixels, 150, 129);
+  cod_draw_text2(font, text_to_render, black, cod_pixels, 150, 129+15);
+  */
   while(running) {
     while(cod_get_event(&e)) {
       switch(e.type) {
-      case COD_QUIT:
-        running = 0;
-        break;
+        case COD_QUIT:
+          running = 0;
+          break;
+        default:
+          break;
       }
     }
 
@@ -58,7 +70,6 @@ int main(void) {
   }
   
   cod_free_font(font);
-  cod_free_image(cat);
 
   cod_close();
   return EXIT_SUCCESS;
