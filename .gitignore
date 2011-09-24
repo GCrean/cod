@@ -2,6 +2,9 @@
 /examples/image
 /examples/skeleton
 /examples/events
+/examples/font
+/examples/eyeballs
 /site.mk
 /tmp
 /lab
+

@@ -16,6 +16,7 @@ extern "C" {
 // Platform enumeration
 #define COD_X11 1
 #define COD_WIN32 2
+#define COD_COCOA 3
 
 ///// MAIN
 
@@ -186,7 +187,7 @@ typedef struct {
 } cod_pixel;
 
 // Bytes per pixel
-#define COD_BYTES_PER_PIXEL sizeof(cod_pixel)
+#define COD_BYTES_PER_PIXEL (sizeof(cod_pixel))
 
 struct cod_image {
   int width, height;
@@ -208,17 +209,23 @@ void cod_draw_image(cod_image* src, int src_x, int src_y, int width,
 // Faster draw with no transparency
 void cod_draw_over_image(cod_image* src, int src_x, int src_y, int width, 
                          int height, cod_image* dst, int dst_x, int dst_y);
+
+// Draw an image directly to the screen
 void cod_simple_draw_image(cod_image* src, int dst_x, int dst_y);
+
+// Draw an image file directly to the screen (obviously should not be used
+// during a loop or something because it loads and then frees the image
 void cod_simple_draw_image_path(const char* image, int dst_x, int dst_y);
 
 ///// FONTS
 
 typedef struct {
+  int initialized;
   // Char's position in the font texture
   int x, y;
   // Width of character
   int width, height;
-  // How much to offset the image from the texture to the screen
+  // How much to offset the position when copying from the texture to the screen
   int xoffset, yoffset;
   // How much x to advance by
   int xadvance;
@@ -230,13 +237,13 @@ typedef struct {
 } cod_font;
 
 cod_font* cod_load_font(const char* fnt_path, const char* png_path);
+void cod_size_text(cod_font* font, int* width, int* height, const char* text);
 void cod_draw_text(cod_font* font, const char* text, cod_pixel fg,
                    cod_image *target, int dstx, int dsty);
-void cod_size_text(cod_font* font, int* width, int* height, const char* text);
 void cod_free_font(cod_font* font);
 
 #ifdef __cplusplus
-extern "C" {
+}
 #endif
 
 #endif // COD_H

@@ -1,11 +1,17 @@
 notes.org -- todo list
 
-* STARTED Add font support
-* TODO Port to Windows
-* TODO Port to Cocoa
-* TODO Documentation
-* TODO Kerning support
-* TODO Pre-multiplied alpha blending?
-* TODO Event: mouse motion
-* TODO Key repeats
-* TODO SSE, MMX, other acronyms that might make things faster
+* Soon
+** STARTED Add font support
+** TODO Kerning
+** TODO Port to Windows
+** TODO Port to Cocoa
+** TODO Documentation
+** DONE Pre-multiplied alpha blending?
+  CLOSED: [2011-09-24 Sat 13:32]
+** TODO Event: mouse motion
+** TODO Key repeats
+
+* Possibly
+** TODO SSE, MMX, other acronyms that might make things faster
+** TODO Unicode support
+

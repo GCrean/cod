@@ -10,6 +10,7 @@ SRC := common font image x11
 SRC := $(foreach x,$(SRC),src/$(x).c)
 OBJ := $(patsubst src/%.c,src/.%.o, $(SRC))
 DEP := $(patsubst src/%.c,src/.%.d, $(SRC))
+EXAMPLES := examples/font examples/events examples/skeleton examples/image
 
 ## Local settings
 -include site.mk
@@ -23,12 +24,12 @@ src/.%.o: src/%.c
 	@echo -n ' CC  ';
 	$(strip $(CC) $(CPPFLAGS) $(CFLAGS) -c -o $@ $<)
 
-examples/%: examples/%.c
+examples/%: examples/%.c $(OUT)
 	@echo -n ' LD  ';
-	$(strip $(CC) $(CPPFLAGS) $(CFLAGS) -o $@ $^ $(LDFLAGS))
+	$(strip $(CC) $(CPPFLAGS) $(CFLAGS) -o $@ $< $(LDFLAGS))
 
 ## Targets
-all: $(OUT) examples/events examples/skeleton examples/image lab
+all: $(OUT) $(EXAMPLES) lab
 
 -include $(DEP)
 
@@ -49,7 +50,7 @@ cod.c: $(SRC)
 
 clean:
 	@echo -n ' RM  ';
-	rm -f $(wildcard $(OBJ) $(EXE) $(OUT) examples/image examples/skeleton)
+	rm -f $(wildcard $(OBJ) $(EXE) $(OUT) $(EXAMPLES))
 
 cleaner: clean
 	@echo -n ' RM  ';

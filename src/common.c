@@ -50,7 +50,7 @@ void _cod_close() {
 
 // Clear screen to black
 void cod_clear(void) {
-  memset(cod_pixels->data, 0, cod_pixels->width * cod_pixels->height * 4);
+  memset(cod_pixels->data, 0, cod_pixels->width * cod_pixels->height * COD_BYTES_PER_PIXEL);
 }
 
 static char* key_names[] = {
@@ -63,3 +63,4 @@ static char* key_names[] = {
 const char* cod_key_name(cod_key key) {
   return key_names[key];
 }
+
