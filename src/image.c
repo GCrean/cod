@@ -121,23 +121,11 @@ void cod_draw_image_tinted(cod_image* src, int src_x, int src_y, int width,
       tint_g = (fg.g * srcp->g) / 255;
       tint_b = (fg.b * srcp->b) / 255;
 
-#if COD_PREMULTIPLIED_ALPHA
-      tint_r = (tint_r * alpha) >> 8;
-      tint_g = (tint_g * alpha) >> 8;
-      tint_b = (tint_b * alpha) >> 8;
-      alpha = (alpha * alpha) >> 8;
-
-      dstp->a = ((alpha * alpha) >> 8) + ((dstp->a * (255 - alpha)) >> 8);
-      dstp->r = tint_r + ((dstp->r * (255 - alpha)) >> 8);
-      dstp->g = tint_g + ((dstp->g * (255 - alpha)) >> 8);
-      dstp->b = tint_b + ((dstp->b * (255 - alpha)) >> 8);
-#else
       inverse_alpha = 255 - alpha;
       
       dstp->r = (((int)tint_r * alpha) + (dstp->r * inverse_alpha)) >> 8;
       dstp->g = (((int)tint_g * alpha) + (dstp->g * inverse_alpha)) >> 8;
       dstp->b = (((int)tint_b * alpha) + (dstp->b * inverse_alpha)) >> 8;
-#endif
 
       ++src_offset;
       ++dst_offset;

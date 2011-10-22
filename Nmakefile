@@ -33,6 +33,7 @@ examples\skeleton.exe: examples\skeleton.obj $(COD_OBJS)
 
 cod.c: src\common.c src\drawing.c src\font.c src\image.c src\stb-png.c src\x11.c src\win32.c
 	type $** > $@
+
 clean:
 	del src\*.obj
 	del examples\*.obj

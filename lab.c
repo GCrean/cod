@@ -11,15 +11,14 @@
   exit(EXIT_FAILURE);
 
 static int mouse_x = 0, mouse_y = 0;
-static cod_image* puppy = NULL;
+static cod_image* puppy = NULL, *cat = NULL;
 static cod_font* proggy = NULL;
 
-static cod_pixel white = COD_MAKE_PIXEL(255, 255, 255);
-static cod_pixel black = COD_MAKE_PIXEL(0, 0, 0);
-static cod_pixel red = COD_MAKE_PIXEL(255, 0, 0);
+static cod_pixel white = COD_MAKE_PIXEL(255, 255, 255, 255);
+static cod_pixel black = COD_MAKE_PIXEL(0, 0, 0, 255);
+static cod_pixel red = COD_MAKE_PIXEL(255, 0, 0, 255);
 static char buffer[COD_BUFFER_SIZE];
-
-static cod_image* otherpuppy = NULL; // CAT!!!!! 
+ 
 
 static void render() {
   cod_fill(cod_screen, white);
@@ -27,8 +26,8 @@ static void render() {
                  center(puppy->width, cod_screen->width),
                  center(puppy->height, cod_screen->height));
 
-  cod_draw_image(otherpuppy, 0, 0, 0, 0, cod_screen,
-                 center(otherpuppy->width, cod_screen->width),
+  cod_draw_image(cat, 0, 0, 0, 0, cod_screen,
+                 center(cat->width, cod_screen->width),
                  center(puppy->height, cod_screen->height));
 
   snprintf(buffer, COD_BUFFER_SIZE, "Mouse: (%d, %d)", mouse_x, mouse_y);
@@ -57,10 +56,9 @@ int main(void) {
   puppy = cod_load_image("examples/puppy.png");
   proggy = cod_load_font("examples/proggy/ProggyCleanTTSZ-12px.fnt",
                                    "examples/proggy/ProggyCleanTTSZ-12px_0.png");
+  cat = cod_load_image("examples/cat.png");
 
-  otherpuppy = cod_load_image("examples/cat.png");
-
-  if(!puppy || !proggy) {
+  if(!puppy || !proggy || !cat) {
     fail();
   }
 
@@ -95,6 +93,7 @@ int main(void) {
   
   cod_free_image(puppy);
   cod_free_font(proggy);
+  cod_free_image(cat);
 
   cod_close();
   return EXIT_SUCCESS;
