@@ -9,7 +9,7 @@ SRC := common drawing font image stb-png x11
 SRC := $(foreach x,$(SRC),src/$(x).c)
 OBJ := $(patsubst src/%.c,src/.%.o, $(SRC))
 DEP := $(patsubst src/%.c,src/.%.d, $(SRC))
-EXAMPLES := examples/font examples/events examples/skeleton examples/primitives examples/image
+EXAMPLES := examples/font examples/eyes examples/events examples/image examples/primitives examples/skeleton 
 
 # Source code for counting lines of code in the whole codebase
 CLOC_SRC := $(SRC) src/win32.c src/cod.h

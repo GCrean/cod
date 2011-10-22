@@ -18,9 +18,9 @@ int main(void) {
 
   cod_set_title("primitives");
 
-  cod_draw_rect(cod_screen, 5, 5, 50, 50, orange);
-  cod_fill_rect(cod_screen, 60, 5, 50, 50, white);
-  cod_fill_bordered_rect(cod_screen, 60+55, 5, 50, 50, white, orange);
+  cod_draw_rect(cod_screen, orange, 5, 5, 50, 50);
+  cod_fill_rect(cod_screen, white, 60, 5, 50, 50);
+  cod_fill_bordered_rect(cod_screen, white, orange, 60+55, 5, 50, 50);
   
   cod_swap();
   

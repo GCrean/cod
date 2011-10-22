@@ -131,6 +131,6 @@ void cod_fill_rect(cod_image* image, cod_pixel fg, int x, int y, int w, int h) {
 }
 
 void cod_fill_bordered_rect(cod_image* image, cod_pixel border, cod_pixel fill, int x, int y, int w, int h) {
-  cod_fill_rect(image, fill, x, y, w, h);
-  cod_draw_rect(image, border, x+1, y+1, w-1, h-1);
+  cod_fill_rect(image, fill, x+1, y+1, w-1, h-1);
+  cod_draw_rect(image, border, x, y, w, h);
 }
