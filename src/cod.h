@@ -18,18 +18,21 @@ extern "C" {
 #define COD_WIN32 2
 #define COD_COCOA 3
 
+#ifdef _MSC_VER
+# define COD_PLATFORM COD_WIN32
+#endif
+
 ///// MAIN
 
 typedef struct cod_image cod_image;
-
 typedef struct cod_event cod_event;
 
 // Window dimensions
 extern int cod_window_width, cod_window_height;
 
 // Pixel buffer - you can write directly to this if you
-// like. cod_draw() draws this to the screen
-cod_image* cod_pixels;
+// like. cod_draw() draws this to the window
+extern cod_image* cod_screen;
 
 // Return the smaller of two numbers
 #define COD_MIN(a,b) (((a) > (b)) ? (b) : (a))
@@ -49,8 +52,9 @@ void cod_clear_error();
 extern char cod_error_buffer[COD_BUFFER_SIZE];
 
 // Open a window and initializes cod. Returns 0 on failure.
-void _cod_open(int, int);
 int cod_open(int width, int height);
+// Internal, platform-specific open
+int _cod_open();
 
 // Draw the buffer to the screen
 void cod_swap();
@@ -66,11 +70,12 @@ void cod_set_title(const char* title);
 int cod_get_event(cod_event* event);
 
 // Shuts down cod
-void _cod_close();
 void cod_close();
+// Internal, platform-specific close
+void _cod_close();
 
-// Sleeps for MICROSECONDS
-void cod_sleep(int microseconds);
+// Sleeps for MILLISECONDS
+void cod_sleep(int milliseconds);
 
 ///// EVENTS
 
@@ -151,7 +156,18 @@ typedef enum {
   V(KEY_RIGHT_BRACKET)      \
   V(KEY_MINUS)              \
   V(KEY_EQUAL)              \
-  V(KEY_SPACE)              
+  V(KEY_SPACE)              \
+  V(KEY_ESCAPE)             \
+  V(KEY_NUMPAD_0)           \
+  V(KEY_NUMPAD_1)           \
+  V(KEY_NUMPAD_2)           \
+  V(KEY_NUMPAD_3)           \
+  V(KEY_NUMPAD_4)           \
+  V(KEY_NUMPAD_5)           \
+  V(KEY_NUMPAD_6)           \
+  V(KEY_NUMPAD_7)           \
+  V(KEY_NUMPAD_8)           \
+  V(KEY_NUMPAD_9)           
 
 typedef enum {
 #define COD_KEY_DECL(X) COD_##X,
@@ -187,6 +203,8 @@ const char* cod_key_name(cod_key key);
 
 ///// IMAGES
 
+// Currently this is treated as a struct of unsigned chars -- but it may become
+// an int later for speed
 typedef struct {
   unsigned char r, g, b, a;
 } cod_pixel;
@@ -199,9 +217,15 @@ struct cod_image {
   cod_pixel* data;
 };
 
+// Use this to construct pixels as the structure behind pixels may change later
+#define COD_MAKE_PIXEL(r,g,b) {(r), (g), (b), 255 }
+
 // Get the offset of an (x,y) coordinate pair in a one-dimensional
 // array: (y * width) + x
 #define COD_IMAGE_OFFSET(x, y, width) (((y) * (width)) + x)
+
+// Set a pixel. Unsafe.
+#define COD_SET_PIXEL(image, x, y, px) ((image)->data[((y) * (image)->width) + (x)]) = (px)
 
 // Allocate a blank image
 cod_image* cod_make_image(int width, int height);
@@ -209,8 +233,16 @@ cod_image* cod_make_image(int width, int height);
 cod_image* cod_load_image(const char* path);
 // Free an image
 void cod_free_image(cod_image*);
+
+// Draw an image
 void cod_draw_image(cod_image* src, int src_x, int src_y, int width, 
 			int height, cod_image* dst, int dst_x, int dst_y);
+
+// Tint and then draw an image
+void cod_draw_image_tinted(cod_image* src, int src_x, int src_y, int width,
+                           int height, cod_image* dst, int dst_x, int dst_y,
+                           cod_pixel fg);
+
 // Faster draw with no transparency
 void cod_draw_over_image(cod_image* src, int src_x, int src_y, int width, 
                          int height, cod_image* dst, int dst_x, int dst_y);
@@ -219,8 +251,20 @@ void cod_draw_over_image(cod_image* src, int src_x, int src_y, int width,
 void cod_simple_draw_image(cod_image* src, int dst_x, int dst_y);
 
 // Draw an image file directly to the screen (obviously should not be used
-// during a loop or something because it loads and then frees the image
+// during a loop or something because it loads and then frees the image)
 void cod_simple_draw_image_path(const char* image, int dst_x, int dst_y);
+
+///// DRAWING
+
+void cod_fill(cod_image* image, cod_pixel fg);
+void cod_draw_horizontal_line(cod_image* image, int x, int y, int width, cod_pixel fg);
+void cod_draw_vertical_line(cod_image* image, int x, int y, int height, cod_pixel fg);
+void cod_draw_line(cod_image* image, int x1, int y1, int x2, int y2, cod_pixel fg);
+void cod_draw_circle(cod_image* image, int cx, int cy, int radius, cod_pixel fg);
+void cod_fill_circle(cod_image* image, int cx, int cy, int radius, cod_pixel fg);
+void cod_draw_rect(cod_image* image, int x, int y, int w, int h, cod_pixel fg);
+void cod_fill_rect(cod_image* image, int x, int y, int w, int h, cod_pixel fg);
+void cod_fill_bordered_rect(cod_image* image, int x, int y, int w, int h, cod_pixel border, cod_pixel fill);
 
 ///// FONTS
 
@@ -246,6 +290,12 @@ void cod_size_text(cod_font* font, int* width, int* height, const char* text);
 void cod_draw_text(cod_font* font, const char* text, cod_pixel fg,
                    cod_image *target, int dstx, int dsty);
 void cod_free_font(cod_font* font);
+
+#ifdef COD_PRIVATE
+# ifdef _MSC_VER
+#  define snprintf(buffer, size, ...) _snprintf_s((buffer), (size), _countof((buffer)), __VA_ARGS__)
+# endif
+#endif
 
 #ifdef __cplusplus
 }

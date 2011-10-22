@@ -1,16 +1,18 @@
 ## Build flags
-CFLAGS := -g3 -O1
+CFLAGS := -g3 
 CPPFLAGS := -Isrc -std=c99 -DCOD_PLATFORM=COD_X11 -Wall -Wextra $(shell pkg-config --cflags x11)
-LDFLAGS := $(shell pkg-config --libs x11) -L. -lcod
+LDFLAGS := -lcod $(shell pkg-config --libs x11) -L.
 
 ## Build variables
-EXE := lab
 OUT := libcod.a
-SRC := common font image x11
+SRC := common drawing font image x11
 SRC := $(foreach x,$(SRC),src/$(x).c)
 OBJ := $(patsubst src/%.c,src/.%.o, $(SRC))
 DEP := $(patsubst src/%.c,src/.%.d, $(SRC))
-EXAMPLES := examples/font examples/events examples/skeleton examples/image
+EXAMPLES := examples/font examples/events examples/skeleton examples/primitives examples/image
+
+# Source code for counting lines of code in the whole codebase
+CLOC_SRC := $(SRC) src/win32.c src/cod.h
 
 ## Local settings
 -include site.mk
@@ -29,7 +31,7 @@ examples/%: examples/%.c $(OUT)
 	$(strip $(CC) $(CPPFLAGS) $(CFLAGS) -o $@ $< $(LDFLAGS))
 
 ## Targets
-all: $(OUT) $(EXAMPLES) lab
+all: $(OUT) $(EXAMPLES)
 
 -include $(DEP)
 
@@ -46,12 +48,19 @@ cod.c: $(SRC)
 	cat $^ > $@ && sed -e 's@#include "stb-png.c"@cat src/stb-png.c@e' -i $@
 
 ## Utilities
-.PHONY: clean cleaner
+.PHONY: clean cleaner cloc
 
 clean:
 	@echo -n ' RM  ';
-	rm -f $(wildcard $(OBJ) $(EXE) $(OUT) $(EXAMPLES))
+	rm -f $(wildcard $(OBJ) lab $(OUT) $(EXAMPLES) src/*.obj examples/*.obj)
 
 cleaner: clean
 	@echo -n ' RM  ';
-	rm -f $(wildcard $(DEP))
+	rm -f $(wildcard $(DEP) cod.c)
+
+cloc:
+	cloc $(CLOC_SRC)
+	@echo 
+	@echo ----------------------- WITH STB_IMAGE ------------------------
+	@echo
+	cloc $(CLOC_SRC) src/stb-png.c

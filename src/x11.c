@@ -1,4 +1,4 @@
-// x11.c -- cod x11 implementation
+// x11.c -- cod x11 backend
 
 #if COD_PLATFORM == COD_X11
 
@@ -9,6 +9,7 @@
 #include <X11/Xlib.h>
 #include <X11/Xutil.h>
 #include <X11/keysymdef.h>
+#include <X11/XKBlib.h> // XkbSetDetectableAutorepeat
 
 #include "cod.h"
 
@@ -18,10 +19,9 @@ static GC gc;
 static XImage* image;
 static char window_title[COD_BUFFER_SIZE];
 static unsigned char* x_pixels;
+static Atom wm_delete_window, wm_protocols;
 
-int cod_open(int width, int height) {
-  _cod_open(width, height);
-
+int _cod_open() {
   // Acquire display information
   if((display = XOpenDisplay(0)) == NULL) {
     COD_ERROR0("cod_open: x11: XOpenDisplay failed");
@@ -40,9 +40,6 @@ int cod_open(int width, int height) {
   int display_depth = DefaultDepth(display, screen);
 
   // Create the window 
-
-  // Put our window in the middle
-
   XSetWindowAttributes attributes;
   attributes.border_pixel = attributes.background_pixel = BlackPixel(display, screen);
 
@@ -56,10 +53,10 @@ int cod_open(int width, int height) {
   }
 
   // Allow the window manager to delete this window
-  Atom wm_delete_window;
+  wm_protocols = XInternAtom(display, "WM_PROTOCOLS", True);
   wm_delete_window = XInternAtom(display, "WM_DELETE_WINDOW", True);
 
-  if(!wm_delete_window) {
+  if(!wm_protocols || !wm_delete_window) {
     COD_ERROR0("cod_open: x11: XInternAtom failed");
     return 0;
   }
@@ -80,15 +77,16 @@ int cod_open(int width, int height) {
   // Create image that we will draw to
   gc = DefaultGC(display, screen);
   image = XCreateImage(display, CopyFromParent, display_depth, ZPixmap, 0, NULL,
-		       cod_window_width, cod_window_height, 32, cod_window_width * COD_BYTES_PER_PIXEL);
+		       cod_window_width, cod_window_height, 32, 0);
 
   if(!image) {
     COD_ERROR0("cod_open: x11: XCreateImage failed");
     return 0;
   }
 
-  cod_pixels = cod_make_image(cod_window_width, cod_window_height);
   x_pixels = COD_ALLOCATE(cod_window_width * cod_window_height * 4);  
+
+  image->data = (char*) x_pixels;
 
   // Tell X11 what events we care about
   XSelectInput(display, window, 
@@ -98,6 +96,11 @@ int cod_open(int width, int height) {
   XMapRaised(display, window);
 
   XFlush(display);
+  
+  Bool auto_repeat_supported;
+  // Do not generate a KeyRelease event for every KeyPress event,
+  // only generate it when the user actually releases the key
+  XkbSetDetectableAutoRepeat(display, True, &auto_repeat_supported);
 
   return 1;
 }
@@ -114,14 +117,13 @@ void cod_set_title(const char* title) {
   XFlush(display);
 }
 
-void cod_close() {
-  _cod_close();
-
+void _cod_close() {
   if(x_pixels) {
     free(x_pixels);
   }
 
   if(image) {
+    image->data = 0;
     XDestroyImage(image);
     image = 0;
   }
@@ -129,11 +131,41 @@ void cod_close() {
   if(display) {
     if(window) {
       XDestroyWindow(display, window);
+      window = 0;
     }
     XCloseDisplay(display);
     display = 0;
   }
+
+
 }
+
+void cod_swap() {
+  // TODO: Figure this out
+  // Convert RGBA to BGRA for x (cause apparently that's what it wants?), then write to screen
+  for(int x = 0; x < cod_window_width; x++) {
+    for(int y = 0; y < cod_window_height; y++) {
+      int cod_offset = (y * cod_window_width) + x;
+      int x_offset = cod_offset * 4;
+      x_pixels[x_offset] = cod_screen->data[cod_offset].b;
+      x_pixels[x_offset+1] = cod_screen->data[cod_offset].g;
+      x_pixels[x_offset+2] = cod_screen->data[cod_offset].r;
+      x_pixels[x_offset+3] = cod_screen->data[cod_offset].a;
+    }
+  }
+
+  XPutImage(display, window, gc, image, 0, 0, 0, 0, cod_window_width, cod_window_height);
+  XFlush(display);
+
+}
+
+extern int usleep(int);
+
+void cod_sleep(int milliseconds) {
+  usleep(milliseconds * 1000);
+}
+
+///// EVENT HANDLING
 
 static cod_key translate_button(int button) {
   switch(button) {
@@ -150,7 +182,6 @@ static void set_button(cod_event* cevent, XEvent* xevent) {
   cevent->data.key_down.x = xevent->xmotion.x;
   cevent->data.key_down.y = xevent->xmotion.y;
   cevent->data.key_down.key = translate_button(xevent->xbutton.button);
-
 }
 
 static cod_key translate_key(XEvent* xevent) {
@@ -181,6 +212,7 @@ static cod_key translate_key(XEvent* xevent) {
     case XK_w: return COD_KEY_W;
     case XK_x: return COD_KEY_X;
     case XK_y: return COD_KEY_Y;
+    case XK_z: return COD_KEY_Z;
     case XK_0: return COD_KEY_0;
     case XK_1: return COD_KEY_1;
     case XK_2: return COD_KEY_2;
@@ -203,6 +235,8 @@ static cod_key translate_key(XEvent* xevent) {
       _(Alt_L, LEFT_ALT);
       // Doesnt seem to work, getting 65027, 0xfe07 or XK_ISO_Level3_Shift apparently
       _(Alt_R, RIGHT_ALT);
+      _(ISO_Level3_Shift, RIGHT_ALT);
+
       _(Return, ENTER);
       _(BackSpace, BACKSPACE);
       _(semicolon, SEMICOLON);
@@ -220,11 +254,21 @@ static cod_key translate_key(XEvent* xevent) {
       _(Tab, TAB);
       _(Caps_Lock, CAPS_LOCK);
       _(grave, GRAVE);
+      _(KP_0, NUMPAD_0);
+      _(KP_1, NUMPAD_1);
+      _(KP_2, NUMPAD_2);
+      _(KP_3, NUMPAD_3);
+      _(KP_4, NUMPAD_4);
+      _(KP_5, NUMPAD_5);
+      _(KP_6, NUMPAD_6);
+      _(KP_7, NUMPAD_7);
+      _(KP_8, NUMPAD_8);
+      _(KP_9, NUMPAD_9);
+      _(Escape, ESCAPE);
 #undef _
       
     default: return COD_KEY_UNKNOWN;
   }
-
 }
 
 int cod_get_event(cod_event* cevent) {
@@ -251,12 +295,23 @@ int cod_get_event(cod_event* cevent) {
         cevent->data.key_down.key = translate_key(&xevent);
         return 1;
       case ClientMessage:
-        cevent->type = COD_QUIT;
-        return 1;
+        if(xevent.xclient.message_type == wm_protocols &&
+           xevent.xclient.format == 32 &&
+           xevent.xclient.data.l[0] == (long) wm_delete_window) {
+          cevent->type = COD_QUIT;
+          return 1;
+        }
+        return 0;
       case MotionNotify:
+        // Apparently motion along the border results in (-1,-1).
+        // Not really useful, so we just throw it away
+        if(xevent.xmotion.x == -1 ||
+           xevent.xmotion.y == -1) {
+          return 0;
+        }
         cevent->type = COD_MOUSE_MOTION;
         cevent->data.mouse_motion.x = xevent.xmotion.x;
-        cevent->data.mouse_motion.y = xevent.xmotion.x;
+        cevent->data.mouse_motion.y = xevent.xmotion.y;
         return 1;
       default:
         break;
@@ -264,33 +319,6 @@ int cod_get_event(cod_event* cevent) {
   }
 
   return 0;
-}
-
-void cod_swap() {
-  // Convert RGBA to BGRA for x (cause apparently that's what it wants?), then write to screen
-  for(int x = 0; x < cod_window_width; x++) {
-    for(int y = 0; y < cod_window_height; y++) {
-      int cod_offset = (y * cod_window_width) + x;
-      int x_offset = cod_offset * 4;
-      x_pixels[x_offset] = cod_pixels->data[cod_offset].b;
-      x_pixels[x_offset+1] = cod_pixels->data[cod_offset].g;
-      x_pixels[x_offset+2] = cod_pixels->data[cod_offset].r;
-      x_pixels[x_offset+3] = cod_pixels->data[cod_offset].a;
-    }
-  }
-
-  image->data = (char*) x_pixels;
-
-  XPutImage(display, window, gc, image, 0, 0, 0, 0, cod_window_width, cod_window_height);
-  XFlush(display);
-
-  image->data = NULL;
-}
-
-extern int usleep(int);
-
-void cod_sleep(int seconds) {
-  usleep(seconds);
 }
 
 #endif // COD_PLATFORM == COD_X11

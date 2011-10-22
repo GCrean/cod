@@ -20,7 +20,7 @@
 
 // Global variables
 int cod_window_width = 0, cod_window_height = 0;
-cod_image* cod_pixels;
+cod_image* cod_screen;
 
 // Error reporting
 char cod_error_buffer[COD_BUFFER_SIZE];
@@ -33,30 +33,36 @@ void cod_clear_error() {
   memset(cod_error_buffer, 0, COD_BUFFER_SIZE);
 }
 
-// The following functions are common platform-independent operations
-// that are called by the platform-specific functions of the same name
-void _cod_open(int width, int height) {
+int cod_open(int width, int height) {
   assert(sizeof(cod_pixel) == sizeof(int));
 
   cod_window_width = width;
   cod_window_height = height;
+
+  cod_screen = cod_make_image(cod_window_width, cod_window_height);
+
+  return _cod_open();
 }
 
-void _cod_close() {
-  if(cod_pixels) {
-    cod_free_image(cod_pixels);
+void cod_close() {
+  _cod_close();
+
+  if(cod_screen) {
+    cod_free_image(cod_screen);
+    cod_screen = NULL;
   }
 }
 
 // Clear screen to black
 void cod_clear(void) {
-  memset(cod_pixels->data, 0, cod_pixels->width * cod_pixels->height * COD_BYTES_PER_PIXEL);
+  memset(cod_screen->data, 0, cod_screen->width * cod_screen->height * COD_BYTES_PER_PIXEL);
 }
 
+///// EVENT HANDLING
 static char* key_names[] = {
 #define COD_KEY_DECL(X) #X,
   COD_DECLARE_KEYS(COD_KEY_DECL)
-  "KEY_UNKNOWN"
+  "KEY_UNKNOWN",
 #undef COD_KEY_DECL
 };
 

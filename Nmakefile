@@ -1,0 +1,27 @@
+
+LDFLAGS = /nologo /SUBSYSTEM:windows 
+CFLAGS = /nologo /W3 /D_CRT_SECURE_NO_WARNINGS /DCOD_PLATFORM=COD_WIN32 /DCOD_WINDOWS_DEBUG /Isrc /TP
+
+COD_OBJS = \
+	src\common.obj \
+	src\drawing.obj \
+	src\font.obj \
+	src\image.obj \
+	src\win32.obj
+
+.c.obj:
+	cl $(CFLAGS) /Fo$@ /c $<
+
+all: examples\events.exe examples\image.exe
+
+examples\events.exe: examples\events.obj $(COD_OBJS)
+	link $(LDFLAGS) /out:examples\events.exe examples\events.obj $(COD_OBJS)
+
+examples\image.exe: examples\image.obj $(COD_OBJS)
+	link $(LDFLAGS) /out:$@ examples\image.obj $(COD_OBJS)
+
+clean:
+	del src\*.obj
+	del examples\*.obj
+
+.PHONY: all clean cod.c

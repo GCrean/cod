@@ -4,70 +4,60 @@
 
 #include "cod.h"
 
-static int yoffset = 0;
+#define center(src, dst) ((dst / 2) - (src / 2))
 
-static void font_demo(const char* path, cod_pixel fg) {
-  char fnt_buffer[COD_BUFFER_SIZE];
-  char png_buffer[COD_BUFFER_SIZE];
-  snprintf(fnt_buffer, COD_BUFFER_SIZE, "%s.fnt", path);
-  snprintf(png_buffer, COD_BUFFER_SIZE, "%s_0.png", path);
+#define fail() \
+  printf("%s\n", cod_get_error()); \
+  exit(EXIT_FAILURE);
 
-  cod_font* font = cod_load_font(fnt_buffer, png_buffer);
-  if(!font) {
-    printf("%s\n", cod_get_error());
-    exit(EXIT_FAILURE);
-  }
+static int mouse_x = 0, mouse_y = 0;
+static cod_image* puppy = NULL;
+static cod_font* proggy = NULL;
 
-  static const char* txt1 = "ABCDEFGHIJKLMNOPQRSTUVWXYZ 12345";
-  static const char* txt2 = "abcdefghijklmnopqrstuvwxyz 67890";
-  static const char* txt3 = "{}[]()<>$*-+=/#_%^@.&|~?'\" !,.;:";
-  static const char* txt4 = "The quick brown fox jumps over the lazy dog.";
-  static const char* txt5 = "Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt";
+static cod_pixel white = COD_MAKE_PIXEL(255, 255, 255);
+static cod_pixel black = COD_MAKE_PIXEL(0, 0, 0);
+static char buffer[COD_BUFFER_SIZE];
 
-  int rough_height = 0, w = 0;
-  cod_size_text(font, &w, &rough_height, txt1);
+static void render() {
+  cod_fill(cod_screen, white);
+  cod_draw_image(puppy, 0, 0, 0, 0, cod_screen,
+                 center(puppy->width, cod_screen->width),
+                 center(puppy->height, cod_screen->height));
 
-  rough_height += 2;
+  snprintf(buffer, COD_BUFFER_SIZE, "Mouse: (%d, %d)", mouse_x, mouse_y);
 
-  cod_draw_text(font, txt1, fg, cod_pixels, 0, yoffset+0);
-  cod_draw_text(font, txt2, fg, cod_pixels, 0, yoffset+rough_height);
-  cod_draw_text(font, txt3, fg, cod_pixels, 0, yoffset+rough_height*2);
-  cod_draw_text(font, txt4, fg, cod_pixels, 0, yoffset+rough_height*4);
-  cod_draw_text(font, txt5, fg, cod_pixels, 0, yoffset+rough_height*5);
+  cod_draw_text(proggy, buffer, black, cod_screen, 5, 5);
 
-  cod_free_font(font);
+  cod_draw_circle(cod_screen, 200, 208, 5, black);
+
+  cod_swap();
 }
 
 int main(void) {
   int running = 1;
 
-  if(!cod_open(1280, 800)) {
+  if(!cod_open(640, 480)) {
     printf("%s\n", cod_get_error());
     return EXIT_FAILURE;
   }
 
-  cod_set_title("font");
+  cod_set_title("eyeballs");
 
   cod_swap();
 
-  static cod_pixel white = {255,255,255,0};
-  static cod_pixel blue = {100, 149, 237,0};
-
-  font_demo("examples/proggy/ProggyCleanTTSZ-12px", white);
-  yoffset += 80;
-  font_demo("examples/droid/DroidSansMono-16px", white);
-  yoffset += 120;
-  font_demo("examples/kingthings/Kingthings-Petrock-32px", white);
-
-  yoffset += 190;
-
-  font_demo("examples/proggy/ProggyCleanTTSZ-12px", blue);
-  yoffset += 80;
-  font_demo("examples/droid/DroidSansMono-16px", blue);
-  yoffset += 120;
-  font_demo("examples/kingthings/Kingthings-Petrock-32px", blue);
-
   cod_event e;
+
+  puppy = cod_load_image("examples/puppy.png");
+  proggy = cod_load_font("examples/proggy/ProggyCleanTTSZ-12px.fnt",
+                                   "examples/proggy/ProggyCleanTTSZ-12px_0.png");
+
+  if(!puppy || !proggy) {
+    fail();
+  }
+
+  int update = 0;
+
+  render();
   
   while(running) {
     while(cod_get_event(&e)) {
@@ -75,14 +65,28 @@ int main(void) {
         case COD_QUIT:
           running = 0;
           break;
+        case COD_MOUSE_MOTION:
+          update = 1;
+          mouse_x = e.data.mouse_motion.x;
+          mouse_y = e.data.mouse_motion.y;
+          break;
         default:
           break;
       }
     }
 
-    cod_swap();
+    if(update) {
+      render();
+
+      update = 0;
+    }
+
+    cod_sleep(1);
   }
   
+  cod_free_image(puppy);
+  cod_free_font(proggy);
+
   cod_close();
   return EXIT_SUCCESS;
 }

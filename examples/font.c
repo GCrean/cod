@@ -29,11 +29,11 @@ static void font_demo(const char* path, cod_pixel fg) {
 
   rough_height += 2;
 
-  cod_draw_text(font, txt1, fg, cod_pixels, 0, yoffset+0);
-  cod_draw_text(font, txt2, fg, cod_pixels, 0, yoffset+rough_height);
-  cod_draw_text(font, txt3, fg, cod_pixels, 0, yoffset+rough_height*2);
-  cod_draw_text(font, txt4, fg, cod_pixels, 0, yoffset+rough_height*4);
-  cod_draw_text(font, txt5, fg, cod_pixels, 0, yoffset+rough_height*5);
+  cod_draw_text(font, txt1, fg, cod_screen, 0, yoffset+0);
+  cod_draw_text(font, txt2, fg, cod_screen, 0, yoffset+rough_height);
+  cod_draw_text(font, txt3, fg, cod_screen, 0, yoffset+rough_height*2);
+  cod_draw_text(font, txt4, fg, cod_screen, 0, yoffset+rough_height*4);
+  cod_draw_text(font, txt5, fg, cod_screen, 0, yoffset+rough_height*5);
 
   cod_free_font(font);
 }
@@ -50,8 +50,8 @@ int main(void) {
 
   cod_swap();
 
-  static cod_pixel white = {255,255,255,0};
-  static cod_pixel blue = {100, 149, 237,0};
+  static cod_pixel white = COD_MAKE_PIXEL(255,255,255);
+  static cod_pixel blue = COD_MAKE_PIXEL(100, 149, 237);
 
   font_demo("examples/proggy/ProggyCleanTTSZ-12px", white);
   yoffset += 80;

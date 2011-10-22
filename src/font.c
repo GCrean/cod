@@ -4,6 +4,10 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#ifndef COD_PRIVATE
+# define COD_PRIVATE
+#endif
+
 #include "cod.h"
 
 #define COD_GET_CHAR(font, c) font->chars[c-32]
@@ -107,7 +111,7 @@ cod_font* cod_load_font(const char* fnt_path, const char* png_path) {
   }
 
   // Allocate the font
-  cod_font* font = COD_ALLOCATE(sizeof(cod_font) + (sizeof(cod_char) * 223));
+  cod_font* font = (cod_font*) COD_ALLOCATE(sizeof(cod_font) + (sizeof(cod_char) * 223));
 
   // Hand them off to the real loading routine, then clean up after it
   if(_cod_load_font(file, font, fnt_path, png_path) == NULL) {
@@ -133,56 +137,6 @@ void cod_size_text(cod_font* font, int* width, int* height, const char* text) {
   (*height) = h;
 }
 
-static void cod_draw_char(cod_image* src, int src_x, int src_y, int width,
-                          int height, cod_image* dst, int dst_x, int dst_y,
-                          cod_pixel fg) {
-  //assert(width && height);
-
-  // Here we truncate the dimensions of the image if it extends over
-  // the borders of the source or destination
-  width = COD_MIN(dst->width - dst_x, COD_MIN(src->width - src_x, width));
-  height = COD_MIN(dst->height - dst_y, COD_MIN(src->height - src_y, height));
-
-  for(int y = 0; y < height; y++) {
-    int src_offset = COD_IMAGE_OFFSET(src_x, src_y + y, src->width);
-    int dst_offset = COD_IMAGE_OFFSET(dst_x, dst_y + y, dst->width);
-    for(int x = 0; x < width; x++) {
-      cod_pixel* dstp = dst->data + dst_offset;
-      cod_pixel* srcp = src->data + src_offset;
-
-      int alpha = (srcp->r + srcp->g + srcp->b) / 3;
-
-      int tint_r = (fg.r * srcp->r) / 255;
-      int tint_g = (fg.g * srcp->g) / 255;
-      int tint_b = (fg.b * srcp->b) / 255;
-
-#define COD_FONT_PMA 1
-
-#if COD_FONT_PMA
-      tint_r = (tint_r * alpha) >> 8;
-      tint_g = (tint_g * alpha) >> 8;
-      tint_b = (tint_b * alpha) >> 8;
-      alpha = (alpha * alpha) >> 8;
-
-      dstp->a = ((alpha * alpha) >> 8) + ((dstp->a * (255 - alpha)) >> 8);
-      dstp->r = tint_r + ((dstp->r * (255 - alpha)) >> 8);
-      dstp->g = tint_g + ((dstp->g * (255 - alpha)) >> 8);
-      dstp->b = tint_b + ((dstp->b * (255 - alpha)) >> 8);
-
-#else
-      int inverse_alpha = 255 - alpha;
-
-      dstp->r = (((int)tint_r * alpha) + (dstp->r * inverse_alpha)) >> 8;
-      dstp->g = (((int)tint_g * alpha) + (dstp->g * inverse_alpha)) >> 8;
-      dstp->b = (((int)tint_b * alpha) + (dstp->b * inverse_alpha)) >> 8;
-#endif
-
-      ++src_offset;
-      ++dst_offset;
-    }
-  }
-}
-
 void cod_draw_text(cod_font* font, const char* text, cod_pixel fg,
                             cod_image *target, int dstx, int dsty) {
   int x = 0, c = 0;
@@ -193,7 +147,7 @@ void cod_draw_text(cod_font* font, const char* text, cod_pixel fg,
     assert(ch->initialized);
 
     if(c != 32) {
-      cod_draw_char(font->image, ch->x, ch->y, ch->width, ch->height, target,
+      cod_draw_image_tinted(font->image, ch->x, ch->y, ch->width, ch->height, target,
                     dstx + x + ch->xoffset,
                     dsty + ch->yoffset, fg);
     }
