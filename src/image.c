@@ -9,6 +9,7 @@
 #include <stdlib.h>
 #include <string.h>
 
+// ifndef is used in case all files are amalgamated into cod.c
 #ifndef COD_PRIVATE
 # define COD_PRIVATE
 #endif
@@ -22,30 +23,6 @@ cod_image* cod_make_image(int width, int height) {
   image->data = (cod_pixel*) COD_ALLOCATE(width * height * COD_BYTES_PER_PIXEL);
   return image;
 }
-
-#if COD_PREMULTIPLIED_ALPHA
-static void premultiply_alpha(cod_image* image) {
-  cod_pixel* newdata = (cod_pixel*) COD_ALLOCATE(image->width * image->height * COD_BYTES_PER_PIXEL);
-  cod_pixel* olddata = image->data;
-  for(int y = 0; y < image->height; y++) {
-    int offset = COD_IMAGE_OFFSET(0, y, image->width);
-    for(int x = 0; x < image->width; x++) {
-
-#define MULTIPLY(c) newdata[offset].c = (olddata[offset].c * olddata[offset].a) >> 8
-      MULTIPLY(a);
-      MULTIPLY(r);
-      MULTIPLY(g);
-      MULTIPLY(b);
-#undef MULTIPLY
-
-      offset++;
-    }
-  }
-  free(olddata);
-  image->data = newdata;
-}
-#endif // COD_PREMULTIPLIED_ALPHA
-
 
 cod_image* cod_load_image(const char* path) {
   cod_image* image = 0;
@@ -62,9 +39,6 @@ cod_image* cod_load_image(const char* path) {
   image->width = width;
   image->height = height;
   image->data = (cod_pixel*) data;
-#if COD_PREMULTIPLIED_ALPHA
-  premultiply_alpha(image);
-#endif
 
   return image;
 }
@@ -100,16 +74,6 @@ void cod_draw_image(cod_image* src, int src_x, int src_y, int width,
       dstp = dst->data + dst_offset;
       srcp = src->data + src_offset;
 
-#if COD_PREMULTIPLIED_ALPHA
-
-      dstp->a = ((srcp->a * srcp->a) >> 8) + ((dstp->a * (255 - srcp->a)) >> 8);
-#define BLEND(c) dstp->c = srcp->c + ((dstp->c * (255 - srcp->a)) >> 8)
-      BLEND(r);
-      BLEND(g);
-      BLEND(b);
-#undef BLEND
-
-#else
       alpha = srcp->a;
       inverse_alpha = 255 - alpha;
 
@@ -117,7 +81,6 @@ void cod_draw_image(cod_image* src, int src_x, int src_y, int width,
       dstp->g = ((srcp->g * alpha) + (dstp->g * inverse_alpha)) >> 8;
       dstp->b = ((srcp->b * alpha) + (dstp->b * inverse_alpha)) >> 8;
       dstp->a = srcp->a;
-#endif
 
       ++src_offset;
       ++dst_offset;

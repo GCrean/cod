@@ -16,6 +16,7 @@ static cod_font* proggy = NULL;
 
 static cod_pixel white = COD_MAKE_PIXEL(255, 255, 255);
 static cod_pixel black = COD_MAKE_PIXEL(0, 0, 0);
+static cod_pixel red = COD_MAKE_PIXEL(255, 0, 0);
 static char buffer[COD_BUFFER_SIZE];
 
 static cod_image* otherpuppy = NULL; // CAT!!!!! 

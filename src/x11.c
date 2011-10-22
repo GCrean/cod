@@ -21,6 +21,8 @@ static char window_title[COD_BUFFER_SIZE];
 static unsigned char* x_pixels;
 static Atom wm_delete_window, wm_protocols;
 
+extern int ffs(int);
+
 int _cod_open() {
   // Acquire display information
   if((display = XOpenDisplay(0)) == NULL) {
@@ -147,17 +149,16 @@ void cod_swap() {
     for(int y = 0; y < cod_window_height; y++) {
       int cod_offset = (y * cod_window_width) + x;
       int x_offset = cod_offset * 4;
+
       x_pixels[x_offset] = cod_screen->data[cod_offset].b;
       x_pixels[x_offset+1] = cod_screen->data[cod_offset].g;
       x_pixels[x_offset+2] = cod_screen->data[cod_offset].r;
       x_pixels[x_offset+3] = 255;
-      //x_pixels[x_offset+3] = cod_screen->data[cod_offset].a;
     }
   }
 
   XPutImage(display, window, gc, image, 0, 0, 0, 0, cod_window_width, cod_window_height);
   XFlush(display);
-
 }
 
 extern int usleep(int);

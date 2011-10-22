@@ -9,7 +9,6 @@ static cod_pixel orange = {237, 149, 100, 255};
 
 int main(void) {
   cod_event e;
-  cod_pixel orange;
   int running = 1;
 
   if(!cod_open(640, 480)) {
