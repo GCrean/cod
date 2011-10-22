@@ -137,6 +137,51 @@ void cod_size_text(cod_font* font, int* width, int* height, const char* text) {
   (*height) = h;
 }
 
+
+void cod_draw_char(cod_image* src, int src_x, int src_y, int width,
+                           int height, cod_image* dst, int dst_x, int dst_y,
+                           cod_pixel fg) {
+  int y, src_offset, dst_offset, x, alpha, inverse_alpha;
+  float tint_r, tint_g, tint_b;
+  cod_pixel *srcp, *dstp;
+
+  assert(src_x >= 0);
+  assert(src_y >= 0);
+  assert(dst_x >= 0);
+  assert(dst_y >= 0);
+
+
+  if(!width) width = src->width;
+  if(!height) height = src->height;
+
+  width = COD_MIN(dst->width - dst_x, COD_MIN(src->width - src_x, width));
+  height = COD_MIN(dst->height - dst_y, COD_MIN(src->height - src_y, height));
+
+  for(y = 0; y < height; y++) {
+    src_offset = COD_IMAGE_OFFSET(src_x, src_y + y, src->width);
+    dst_offset = COD_IMAGE_OFFSET(dst_x, dst_y + y, dst->width);
+    for(x = 0; x < width; x++) {
+      dstp = dst->data + dst_offset;
+      srcp = src->data + src_offset;
+
+      alpha = (srcp->r + srcp->g + srcp->b) / 3;
+
+      tint_r = (fg.r * srcp->r) / 255;
+      tint_g = (fg.g * srcp->g) / 255;
+      tint_b = (fg.b * srcp->b) / 255;
+
+      inverse_alpha = 255 - alpha;
+      
+      dstp->r = (((int)tint_r * alpha) + (dstp->r * inverse_alpha)) >> 8;
+      dstp->g = (((int)tint_g * alpha) + (dstp->g * inverse_alpha)) >> 8;
+      dstp->b = (((int)tint_b * alpha) + (dstp->b * inverse_alpha)) >> 8;
+
+      ++src_offset;
+      ++dst_offset;
+    }
+  }
+}
+
 void cod_draw_text(cod_font* font, const char* text, cod_pixel fg,
                             cod_image *target, int dstx, int dsty) {
   int x = 0, c = 0;
@@ -147,7 +192,7 @@ void cod_draw_text(cod_font* font, const char* text, cod_pixel fg,
     assert(ch->initialized);
 
     if(c != 32) {
-      cod_draw_image_tinted(font->image, ch->x, ch->y, ch->width, ch->height, target,
+      cod_draw_char(font->image, ch->x, ch->y, ch->width, ch->height, target,
                     dstx + x + ch->xoffset,
                     dsty + ch->yoffset, fg);
     }

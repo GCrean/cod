@@ -67,7 +67,7 @@ void cod_draw_image(cod_image* src, int src_x, int src_y, int width,
   width = COD_MIN(dst->width - dst_x, COD_MIN(src->width - src_x, width));
   height = COD_MIN(dst->height - dst_y, COD_MIN(src->height - src_y, height));
 
-  for( y = 0; y < height; y++) {
+  for(y = 0; y < height; y++) {
     src_offset = COD_IMAGE_OFFSET(src_x, src_y + y, src->width);
     dst_offset = COD_IMAGE_OFFSET(dst_x, dst_y + y, dst->width);
     for(x = 0; x < width; x++) {
@@ -88,11 +88,11 @@ void cod_draw_image(cod_image* src, int src_x, int src_y, int width,
   }
 }
 
-void cod_draw_image_tinted(cod_image* src, int src_x, int src_y, int width,
-                           int height, cod_image* dst, int dst_x, int dst_y,
-                           cod_pixel fg) {
-  int y, src_offset, dst_offset, x, alpha, inverse_alpha, tint_r, tint_g, tint_b;
+void cod_draw_image_tinted(cod_image* src, cod_pixel fg, int src_x, int src_y, int width,
+                           int height, cod_image* dst, int dst_x, int dst_y) {
+  int y, src_offset, dst_offset, x, alpha, inverse_alpha;
   cod_pixel *srcp, *dstp;
+  float tint_r = 0, tint_g = 0, tint_b = 0;
 
   assert(src_x >= 0);
   assert(src_y >= 0);
@@ -115,11 +115,11 @@ void cod_draw_image_tinted(cod_image* src, int src_x, int src_y, int width,
       dstp = dst->data + dst_offset;
       srcp = src->data + src_offset;
 
-      alpha = (srcp->r + srcp->g + srcp->b) / 3;
+      alpha = srcp->a;
 
-      tint_r = (fg.r * srcp->r) / 255;
-      tint_g = (fg.g * srcp->g) / 255;
-      tint_b = (fg.b * srcp->b) / 255;
+      tint_r = (fg.r + srcp->r) / 2.0f;
+      tint_g = (fg.g + srcp->g) / 2.0f;
+      tint_b = (fg.b + srcp->b) / 2.0f;
 
       inverse_alpha = 255 - alpha;
       

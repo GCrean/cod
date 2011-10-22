@@ -2,6 +2,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#define COD_PRIVATE
+
 #include "cod.h"
 
 #define center(src, dst) ((dst / 2) - (src / 2))
@@ -18,7 +20,7 @@ static cod_pixel white = COD_MAKE_PIXEL(255, 255, 255, 255);
 static cod_pixel black = COD_MAKE_PIXEL(0, 0, 0, 255);
 static cod_pixel red = COD_MAKE_PIXEL(255, 0, 0, 255);
 static char buffer[COD_BUFFER_SIZE];
- 
+
 
 static void render() {
   cod_fill(cod_screen, white);
@@ -26,21 +28,22 @@ static void render() {
                  center(puppy->width, cod_screen->width),
                  center(puppy->height, cod_screen->height));
 
-  cod_draw_image(cat, 0, 0, 0, 0, cod_screen,
-                 center(cat->width, cod_screen->width),
-                 center(puppy->height, cod_screen->height));
+  cod_draw_image_tinted(cat, red, 0, 0, 0, 0, cod_screen, 400, 0);
 
   snprintf(buffer, COD_BUFFER_SIZE, "Mouse: (%d, %d)", mouse_x, mouse_y);
 
   cod_draw_text(proggy, buffer, black, cod_screen, 5, 5);
 
-  cod_draw_circle(cod_screen, 200, 208, 5, black);
+  cod_fill_circle(cod_screen, white, 200, 208, 10);
+  cod_draw_circle(cod_screen, black, 200, 208, 10);
+  cod_fill_circle(cod_screen, black, 200, 208, 4);
 
   cod_swap();
 }
 
 int main(void) {
-  int running = 1;
+  cod_event e;
+  int running = 1, update=0;
 
   if(!cod_open(640, 480)) {
     printf("%s\n", cod_get_error());
@@ -51,8 +54,6 @@ int main(void) {
 
   cod_swap();
 
-  cod_event e;
-
   puppy = cod_load_image("examples/puppy.png");
   proggy = cod_load_font("examples/proggy/ProggyCleanTTSZ-12px.fnt",
                                    "examples/proggy/ProggyCleanTTSZ-12px_0.png");
@@ -61,8 +62,6 @@ int main(void) {
   if(!puppy || !proggy || !cat) {
     fail();
   }
-
-  int update = 0;
 
   render();
   

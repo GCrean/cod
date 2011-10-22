@@ -1,6 +1,7 @@
 // drawing.c -- drawing primitives, lines, rectangles, etc
 #include <stdio.h>
 #include <stdlib.h>
+#include <math.h>
 
 #include "cod.h"
 
@@ -17,7 +18,7 @@ void cod_fill(cod_image* image, cod_pixel fg) {
   }
 }
 
-void cod_draw_horizontal_line(cod_image* image, int x, int y, int width, cod_pixel fg) {
+void cod_draw_horizontal_line(cod_image* image, cod_pixel fg, int x, int y, int width) {
   int offset = COD_IMAGE_OFFSET(x, y, image->width);
   int clip = COD_MIN(x+width, image->width);
   int ix;
@@ -27,7 +28,7 @@ void cod_draw_horizontal_line(cod_image* image, int x, int y, int width, cod_pix
   }
 }
 
-void cod_draw_vertical_line(cod_image* image, int x, int y, int height, cod_pixel fg) {
+void cod_draw_vertical_line(cod_image* image, cod_pixel fg, int x, int y, int height) {
   int clip = COD_MIN(y+height, image->height);
   int offset = COD_IMAGE_OFFSET(x, y, image->width);
   int iy;
@@ -36,7 +37,7 @@ void cod_draw_vertical_line(cod_image* image, int x, int y, int height, cod_pixe
   }
 }
 
-void cod_draw_line(cod_image* image, int x0, int y0, int x1, int y1, cod_pixel fg) {
+void cod_draw_line(cod_image* image, cod_pixel fg, int x0, int y0, int x1, int y1) {
   // TODO: Probably should optimize for horizontal/vertical lines
   int dx, dy, sx, sy, err, e2;
 
@@ -57,30 +58,36 @@ void cod_draw_line(cod_image* image, int x0, int y0, int x1, int y1, cod_pixel f
   }
 }
 
+// Circles
 
-static void plot4points(cod_image* image, int cx, int cy, int x, int y, cod_pixel fg) {
-  COD_SET_PIXEL(image, cx + x, cy + y, fg);
-  if(x != 0) COD_SET_PIXEL(image, cx - x, cy + y, fg);
-  if(y != 0) COD_SET_PIXEL(image, cx + x, cy - y, fg);
-  if(x != 0 && y != 0) COD_SET_PIXEL(image, cx - x, cy - y, fg);
-}
-
-static void plot8points(cod_image* image, int cx, int cy, int x, int y, cod_pixel fg) {
-  plot4points(image, cx, cy, x, y, fg);
-  if(x != y)
-    plot4points(image, cx, cy, y, x, fg);
-}
-
-void cod_draw_circle(cod_image* image, int cx, int cy, int radius, cod_pixel fg) {
+void cod_draw_circle(cod_image* image, cod_pixel fg, int cx, int cy, int radius) {
   int error = -radius;
   int x = radius;
   int y = 0;
   while(x >= y) {
-    plot8points(image, cx, cy, x, y, fg);
+    COD_SET_PIXEL(image, cx + x, cy + y, fg);
+    COD_SET_PIXEL(image, cx + y, cy + x, fg);
+
+    if (x != 0) {
+      COD_SET_PIXEL(image, cx - x, cy + y, fg);
+      COD_SET_PIXEL(image, cx + y, cy - x, fg);
+    }
+       
+    if (y != 0) {
+      COD_SET_PIXEL(image, cx + x, cy - y, fg);
+      COD_SET_PIXEL(image, cx - y, cy + x, fg);
+    }
+       
+    if (x != 0 && y != 0) {
+      COD_SET_PIXEL(image, cx - x, cy - y, fg);
+      COD_SET_PIXEL(image, cx - y, cy - x, fg);
+    }
+           
     error += y;
     ++y;
     error += y;
-    if(error >= 0) {
+
+    if (error >= 0) {
       --x;
       error -= x;
       error -= x;
@@ -88,31 +95,42 @@ void cod_draw_circle(cod_image* image, int cx, int cy, int radius, cod_pixel fg)
   }
 }
 
-void cod_fill_circle(cod_image* image, int cx, int cy, int radius, cod_pixel fg) {
-  (void) image;
-  (void) cx;
-  (void) cy;
-  (void) radius;
-  (void) fg;
-}
-
-// Rectangle
-
-void cod_draw_rect(cod_image* image, int x, int y, int w, int h, cod_pixel fg) {
-  cod_draw_horizontal_line(image, x, y, w, fg);
-  cod_draw_horizontal_line(image, x, y+h, w, fg);
-  cod_draw_vertical_line(image, x, y, h, fg);
-  cod_draw_vertical_line(image, x+w, y, h, fg);
-}
-
-void cod_fill_rect(cod_image* image, int x, int y, int w, int h, cod_pixel fg) {
-  int yi;
-  for(yi = y; yi < y+h+1; yi++) {
-    cod_draw_horizontal_line(image, x, yi, w, fg);
+void cod_fill_circle(cod_image* image, cod_pixel fg, int cx, int cy, int radius) {
+  double r = (double) radius;
+  double dy, dx;
+  int x;
+  int offset_a, offset_b;
+  for(dy = 1; dy <= r; dy += 1.0) {
+    dx = floor(sqrt((2.0 * r * dy) - (dy * dy)));
+    x = cx - dx;
+    offset_a = COD_IMAGE_OFFSET(x, cy + r - dy, image->width);
+    offset_b = COD_IMAGE_OFFSET(x, cy - r + dy, image->width);
+    for(; x <= cx + dx; x++) {
+      image->data[offset_a] = fg;
+      image->data[offset_b] = fg;
+      ++offset_a;
+      ++offset_b;
+    }
   }
 }
 
-void cod_fill_bordered_rect(cod_image* image, int x, int y, int w, int h, cod_pixel border, cod_pixel fill) {
-  cod_fill_rect(image, x, y, w, h, fill);
-  cod_draw_rect(image, x+1, y+1, w-1, h-1, border);
+// Rectangles
+
+void cod_draw_rect(cod_image* image, cod_pixel fg, int x, int y, int w, int h) {
+  cod_draw_horizontal_line(image, fg, x, y, w);
+  cod_draw_horizontal_line(image, fg, x, y+h, w);
+  cod_draw_vertical_line(image, fg, x, y, h);
+  cod_draw_vertical_line(image, fg, x+w, y, h);
+}
+
+void cod_fill_rect(cod_image* image, cod_pixel fg, int x, int y, int w, int h) {
+  int yi;
+  for(yi = y; yi < y+h+1; yi++) {
+    cod_draw_horizontal_line(image, fg, x, yi, w);
+  }
+}
+
+void cod_fill_bordered_rect(cod_image* image, cod_pixel border, cod_pixel fill, int x, int y, int w, int h) {
+  cod_fill_rect(image, fill, x, y, w, h);
+  cod_draw_rect(image, border, x+1, y+1, w-1, h-1);
 }

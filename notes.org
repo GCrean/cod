@@ -10,9 +10,12 @@ notes.org -- todo list
 ** TODO go to sleep properly (when window is hidden, applications should pause)
 ** TODO improve error handling (should have like cod_error_count++ for errors)
 ** TODO cleanup
-** TODO font output is wrong
 
 * Eventually
+** TODO premultiplied alpha, proper additive color blending
+   this is just a nightmare. gonna have to sit down with a library
+   that is known to be correct (probably cairo), then make sure the
+   cod output matches it pixel-for-pixel
 ** TODO port to Cocoa
 ** TODO modifier handling?
 ** TODO kerning

@@ -242,9 +242,8 @@ void cod_draw_image(cod_image* src, int src_x, int src_y, int width,
 			int height, cod_image* dst, int dst_x, int dst_y);
 
 // Tint and then draw an image
-void cod_draw_image_tinted(cod_image* src, int src_x, int src_y, int width,
-                           int height, cod_image* dst, int dst_x, int dst_y,
-                           cod_pixel fg);
+void cod_draw_image_tinted(cod_image* src, cod_pixel fg, int src_x, int src_y, int width,
+                           int height, cod_image* dst, int dst_x, int dst_y);
 
 // Faster draw with no transparency
 void cod_draw_over_image(cod_image* src, int src_x, int src_y, int width, 
@@ -260,14 +259,14 @@ void cod_simple_draw_image_path(const char* image, int dst_x, int dst_y);
 ///// DRAWING
 
 void cod_fill(cod_image* image, cod_pixel fg);
-void cod_draw_horizontal_line(cod_image* image, int x, int y, int width, cod_pixel fg);
-void cod_draw_vertical_line(cod_image* image, int x, int y, int height, cod_pixel fg);
-void cod_draw_line(cod_image* image, int x1, int y1, int x2, int y2, cod_pixel fg);
-void cod_draw_circle(cod_image* image, int cx, int cy, int radius, cod_pixel fg);
-void cod_fill_circle(cod_image* image, int cx, int cy, int radius, cod_pixel fg);
-void cod_draw_rect(cod_image* image, int x, int y, int w, int h, cod_pixel fg);
-void cod_fill_rect(cod_image* image, int x, int y, int w, int h, cod_pixel fg);
-void cod_fill_bordered_rect(cod_image* image, int x, int y, int w, int h, cod_pixel border, cod_pixel fill);
+void cod_draw_horizontal_line(cod_image* image, cod_pixel fg, int x, int y, int width);
+void cod_draw_vertical_line(cod_image* image, cod_pixel fg, int x, int y, int height);
+void cod_draw_line(cod_image* image, cod_pixel fg, int x1, int y1, int x2, int y2);
+void cod_draw_circle(cod_image* image, cod_pixel fg, int cx, int cy, int radius);
+void cod_fill_circle(cod_image* image, cod_pixel fg, int x, int y, int radius);
+void cod_draw_rect(cod_image* image, cod_pixel fg, int x, int y, int w, int h);
+void cod_fill_rect(cod_image* image, cod_pixel fg, int x, int y, int w, int h);
+void cod_fill_bordered_rect(cod_image* image, cod_pixel border, cod_pixel fill, int x, int y, int w, int h);
 
 ///// FONTS
 

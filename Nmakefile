@@ -14,7 +14,7 @@ COD_OBJS = \
 .c.obj:
 	cl $(CFLAGS) /Fo$@ /c $<
 
-all: examples\primitives.exe examples\events.exe examples\font.exe examples\image.exe examples\skeleton.exe
+all: examples\primitives.exe examples\events.exe examples\font.exe examples\image.exe examples\skeleton.exe lab.exe
 
 examples\events.exe: examples\events.obj $(COD_OBJS)
 	$(LINK)
@@ -29,6 +29,9 @@ examples\primitives.exe: examples\primitives.obj $(COD_OBJS)
 	$(LINK)
 
 examples\skeleton.exe: examples\skeleton.obj $(COD_OBJS)
+	$(LINK)
+
+lab.exe: lab.obj $(COD_OBJS)
 	$(LINK)
 
 cod.c: src\common.c src\drawing.c src\font.c src\image.c src\stb-png.c src\x11.c src\win32.c
