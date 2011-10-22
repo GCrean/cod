@@ -1,11 +1,11 @@
 ## Build flags
 CFLAGS := -g3 
-CPPFLAGS := -Isrc -std=c99 -DCOD_PLATFORM=COD_X11 -Wall -Wextra $(shell pkg-config --cflags x11)
+CPPFLAGS := -I. -std=c99 -DCOD_PLATFORM=COD_X11 -Wall -Wextra $(shell pkg-config --cflags x11)
 LDFLAGS := -lcod $(shell pkg-config --libs x11) -L.
 
 ## Build variables
 OUT := libcod.a
-SRC := common drawing font image x11
+SRC := common drawing font image stb-png x11
 SRC := $(foreach x,$(SRC),src/$(x).c)
 OBJ := $(patsubst src/%.c,src/.%.o, $(SRC))
 DEP := $(patsubst src/%.c,src/.%.d, $(SRC))
@@ -45,7 +45,7 @@ $(OUT): $(OBJ)
 
 # Creates amalgamated file of all sources for ease of distribution
 cod.c: $(SRC)
-	cat $^ > $@ && sed -e 's@#include "stb-png.c"@cat src/stb-png.c@e' -i $@
+	cat $^ > $@
 
 ## Utilities
 .PHONY: clean cleaner cloc

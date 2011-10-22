@@ -18,10 +18,16 @@ static cod_pixel white = COD_MAKE_PIXEL(255, 255, 255);
 static cod_pixel black = COD_MAKE_PIXEL(0, 0, 0);
 static char buffer[COD_BUFFER_SIZE];
 
+static cod_image* otherpuppy = NULL; // CAT!!!!! 
+
 static void render() {
   cod_fill(cod_screen, white);
   cod_draw_image(puppy, 0, 0, 0, 0, cod_screen,
                  center(puppy->width, cod_screen->width),
+                 center(puppy->height, cod_screen->height));
+
+  cod_draw_image(otherpuppy, 0, 0, 0, 0, cod_screen,
+                 center(otherpuppy->width, cod_screen->width),
                  center(puppy->height, cod_screen->height));
 
   snprintf(buffer, COD_BUFFER_SIZE, "Mouse: (%d, %d)", mouse_x, mouse_y);
@@ -50,6 +56,8 @@ int main(void) {
   puppy = cod_load_image("examples/puppy.png");
   proggy = cod_load_font("examples/proggy/ProggyCleanTTSZ-12px.fnt",
                                    "examples/proggy/ProggyCleanTTSZ-12px_0.png");
+
+  otherpuppy = cod_load_image("examples/cat.png");
 
   if(!puppy || !proggy) {
     fail();

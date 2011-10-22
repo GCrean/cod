@@ -1,13 +1,15 @@
-// drawing.c -- drawing primitives, lines, rectanges, etc
+// drawing.c -- drawing primitives, lines, rectangles, etc
 #include <stdio.h>
 #include <stdlib.h>
 
 #include "cod.h"
 
 void cod_fill(cod_image* image, cod_pixel fg) {
-  for(int y = 0; y < image->height; y++) {
+  int x,y;
+
+  for(y = 0; y < image->height; y++) {
     int offset = COD_IMAGE_OFFSET(0, y, image->width);
-    for(int x = 0; x < image->width; x++) {
+    for(x = 0; x < image->width; x++) {
       cod_pixel* dst = &image->data[offset];
       (*dst) = fg;
       ++offset;
@@ -18,7 +20,9 @@ void cod_fill(cod_image* image, cod_pixel fg) {
 void cod_draw_horizontal_line(cod_image* image, int x, int y, int width, cod_pixel fg) {
   int offset = COD_IMAGE_OFFSET(x, y, image->width);
   int clip = COD_MIN(x+width, image->width);
-  for(int ix = x; ix <= clip; ix++) {
+  int ix;
+
+  for(ix = x; ix <= clip; ix++) {
     image->data[offset++] = fg;
   }
 }
@@ -26,20 +30,23 @@ void cod_draw_horizontal_line(cod_image* image, int x, int y, int width, cod_pix
 void cod_draw_vertical_line(cod_image* image, int x, int y, int height, cod_pixel fg) {
   int clip = COD_MIN(y+height, image->height);
   int offset = COD_IMAGE_OFFSET(x, y, image->width);
-  for(int iy = y; iy <= clip; iy++, offset += image->width) {
+  int iy;
+  for(iy = y; iy <= clip; iy++, offset += image->width) {
     image->data[offset] = fg;
   }
 }
 
 void cod_draw_line(cod_image* image, int x0, int y0, int x1, int y1, cod_pixel fg) {
   // TODO: Probably should optimize for horizontal/vertical lines
-  int dx = abs(x1-x0);
-  int dy = abs(y1-y0);; 
+  int dx, dy, sx, sy, err, e2;
 
-  int sx = x0<x1 ? 1 : -1;
-  int sy = y0<y1 ? 1 : -1;
+  dx = abs(x1-x0);
+  dy = abs(y1-y0);
 
-  int err = (dx>dy ? dx : -dy)/2, e2;
+  sx = x0 < x1 ? 1 : -1;
+  sy = y0 < y1 ? 1 : -1;
+
+  err = (dx>dy ? dx : -dy)/2;
  
   for(;;) {
     COD_SET_PIXEL(image, x0, y0, fg);
@@ -99,7 +106,8 @@ void cod_draw_rect(cod_image* image, int x, int y, int w, int h, cod_pixel fg) {
 }
 
 void cod_fill_rect(cod_image* image, int x, int y, int w, int h, cod_pixel fg) {
-  for(int yi = y; yi < y+h+1; yi++) {
+  int yi;
+  for(yi = y; yi < y+h+1; yi++) {
     cod_draw_horizontal_line(image, x, yi, w, fg);
   }
 }

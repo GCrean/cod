@@ -150,7 +150,8 @@ void cod_swap() {
       x_pixels[x_offset] = cod_screen->data[cod_offset].b;
       x_pixels[x_offset+1] = cod_screen->data[cod_offset].g;
       x_pixels[x_offset+2] = cod_screen->data[cod_offset].r;
-      x_pixels[x_offset+3] = cod_screen->data[cod_offset].a;
+      x_pixels[x_offset+3] = 255;
+      //x_pixels[x_offset+3] = cod_screen->data[cod_offset].a;
     }
   }
 

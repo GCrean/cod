@@ -8,9 +8,11 @@ notes.org -- todo list
    Maybe convert to C89? Annoying but doable.
 ** TODO fix cod_pixel to int, proper RGBA format
 ** TODO go to sleep properly (when window is hidden, applications should pause)
+** TODO improve error handling (should have like cod_error_count++ for errors)
 ** TODO cleanup
+** TODO font output is wrong
 
-* Possibly
+* Eventually
 ** TODO port to Cocoa
 ** TODO modifier handling?
 ** TODO kerning

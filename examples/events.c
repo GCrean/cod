@@ -11,6 +11,8 @@ int main(int argc, char** argv) {
   // not (it's very annoying)
   int show_mouse_motion = argc > 1;
 
+  cod_event e;
+
   if(argc > 1)
     printf("%s\n", argv[1]);
 
@@ -22,8 +24,6 @@ int main(int argc, char** argv) {
   cod_set_title("events");
 
   cod_swap();
-
-  cod_event e;
   
   while(running) {
     while(cod_get_event(&e)) {

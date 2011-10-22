@@ -15,7 +15,11 @@
 cod_font* _cod_load_font(FILE* file, cod_font* font, const char* fnt_path, const char* png_path) {
   char buffer[COD_BUFFER_SIZE];
 
-  int lineHeight = 0, base = 0, scaleW = 0, scaleH = 0, pages = 0, packed = 0, alphaChnl = 0, redChnl = 0, greenChnl = 0, blueChnl = 0;
+  int lineHeight = 0, base = 0, scaleW = 0, scaleH = 0, pages = 0, packed = 0, alphaChnl = 0, redChnl = 0, greenChnl = 0, blueChnl = 0, chars = 0;
+
+  // For looping
+  int i=0, id=0, x=0, y=0, width=0, height=0, xoffset=0, yoffset=0, xadvance=0, page=0, chnl=0;
+  cod_char* chr = NULL;
 
 #define skip_line() \
   if(fgets(buffer, COD_BUFFER_SIZE, file) != buffer) {                 \
@@ -40,8 +44,6 @@ cod_font* _cod_load_font(FILE* file, cod_font* font, const char* fnt_path, const
 
 #undef skip_line
 
-  int chars = 0;
-
   if(fscanf(file, "chars count=%d\n", &chars) != 1) {
     COD_ERROR("cod_load_font: file \"%s\": fscanf failed to scan row 'chars'", fnt_path);
     return NULL;
@@ -52,9 +54,7 @@ cod_font* _cod_load_font(FILE* file, cod_font* font, const char* fnt_path, const
     return NULL;
   }
 
-  for(int i = 0; i != chars; i++) {
-    int id=0, x=0, y=0, width=0, height=0, xoffset=0, yoffset=0, xadvance=0, page=0, chnl=0;
-
+  for(i = 0; i != chars; i++) {
     if(fscanf(file, "char id=%d x=%d y=%d width=%d height=%d xoffset=%d yoffset=%d xadvance=%d page=%d chnl=%d\n",
               &id, &x, &y, &width, &height, &xoffset, &yoffset, &xadvance, &page, &chnl) != 10) {
       COD_ERROR("cod_load_font: file \"%s\": fscanf failed to scan char in file", fnt_path);
@@ -70,7 +70,6 @@ cod_font* _cod_load_font(FILE* file, cod_font* font, const char* fnt_path, const
     //printf("char id=%d x=%d y=%d width=%d height=%d xoffset=%d yoffset=%d xadvance=%d page=%d chnl=%d\n",
     //       id, x, y, width, height, xoffset, yoffset, xadvance, page, chnl);
 
-
     if(id > 255) {
       COD_ERROR("cod_load_font: encountered unsupported character %d\n", id);
       return NULL;
@@ -78,7 +77,7 @@ cod_font* _cod_load_font(FILE* file, cod_font* font, const char* fnt_path, const
       continue;
     }
 
-    cod_char* chr = &COD_GET_CHAR(font, id);
+    chr = &COD_GET_CHAR(font, id);
     chr->initialized = 1;
     chr->x = x;
     chr->y = y;
@@ -103,6 +102,7 @@ cod_font* _cod_load_font(FILE* file, cod_font* font, const char* fnt_path, const
 
 cod_font* cod_load_font(const char* fnt_path, const char* png_path) {
   // Open the file
+  cod_font* font = NULL;
   FILE* file = fopen(fnt_path, "r");
 
   if(!file) {
@@ -111,7 +111,7 @@ cod_font* cod_load_font(const char* fnt_path, const char* png_path) {
   }
 
   // Allocate the font
-  cod_font* font = (cod_font*) COD_ALLOCATE(sizeof(cod_font) + (sizeof(cod_char) * 223));
+  font = (cod_font*) COD_ALLOCATE(sizeof(cod_font) + (sizeof(cod_char) * 223));
 
   // Hand them off to the real loading routine, then clean up after it
   if(_cod_load_font(file, font, fnt_path, png_path) == NULL) {

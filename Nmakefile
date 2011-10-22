@@ -1,24 +1,35 @@
+LINK = link $(LDFLAGS) /out:$@ $**
 
 LDFLAGS = /nologo /SUBSYSTEM:windows 
-CFLAGS = /nologo /W3 /D_CRT_SECURE_NO_WARNINGS /DCOD_PLATFORM=COD_WIN32 /DCOD_WINDOWS_DEBUG /Isrc /TP
+CFLAGS = /nologo /W3 /D_CRT_SECURE_NO_WARNINGS /DCOD_PLATFORM=COD_WIN32 /DCOD_WINDOWS_DEBUG /I.
 
 COD_OBJS = \
 	src\common.obj \
 	src\drawing.obj \
 	src\font.obj \
 	src\image.obj \
+	src\stb-png.obj \
 	src\win32.obj
 
 .c.obj:
 	cl $(CFLAGS) /Fo$@ /c $<
 
-all: examples\events.exe examples\image.exe
+all: examples\primitives.exe examples\events.exe examples\font.exe examples\image.exe examples\skeleton.exe
 
 examples\events.exe: examples\events.obj $(COD_OBJS)
-	link $(LDFLAGS) /out:examples\events.exe examples\events.obj $(COD_OBJS)
+	$(LINK)
+
+examples\font.exe: examples\font.obj $(COD_OBJS)
+	$(LINK)
 
 examples\image.exe: examples\image.obj $(COD_OBJS)
-	link $(LDFLAGS) /out:$@ examples\image.obj $(COD_OBJS)
+	$(LINK)
+
+examples\primitives.exe: examples\primitives.obj $(COD_OBJS)
+	$(LINK)
+
+examples\skeleton.exe: examples\skeleton.obj $(COD_OBJS)
+	$(LINK)
 
 clean:
 	del src\*.obj

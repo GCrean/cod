@@ -6,6 +6,7 @@
 
 int main(void) {
   int running = 1;
+  cod_event e;
 
 
   if(!cod_open(640, 480)) {
@@ -16,8 +17,6 @@ int main(void) {
   cod_set_title("skeleton");
 
   cod_swap();
-
-  cod_event e;
   
   while(running) {
     while(cod_get_event(&e)) {

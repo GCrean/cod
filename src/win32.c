@@ -101,10 +101,11 @@ static void winfail() {
 }
 
 int _cod_open() {
+  BITMAPINFO bi;
+  WNDCLASSEX window_class;
   HINSTANCE hinstance = GetModuleHandle(NULL);
 	LPCTSTR window_class_name = TEXT("cod");
 
-  WNDCLASSEX window_class;
   ZeroMemory(&window_class, sizeof(WNDCLASSEX));
   window_class.cbSize = sizeof(WNDCLASSEX);
   window_class.style = 0;
@@ -146,7 +147,6 @@ int _cod_open() {
 
   window_hdc = GetDC(window);
   // Create a bitmap we can write to 
-  BITMAPINFO bi;
   bi.bmiHeader.biSize = sizeof(BITMAPINFOHEADER);
   bi.bmiHeader.biWidth = cod_window_width;
   bi.bmiHeader.biHeight = -cod_window_height; 
@@ -189,21 +189,12 @@ void cod_set_title(const char* title) {
 }
 
 void cod_swap() {
-  /*
-  for(int x = 0; x < cod_window_width; x++) {
-    for(int y = 0; y < cod_window_height; y++) {
-      int cod_offset = (y * cod_window_width) + x;
-      buffer_data[cod_offset] = cod_screen->data[cod_offset].r;
-      buffer_data[cod_offset+1] = cod_screen->data[cod_offset].g;
-      buffer_data[cod_offset+2] = cod_screen->data[cod_offset].b;
-    }
-  }
-  */
+  int x, y, offset, w_offset;
 
-  for(int x = 0; x < cod_window_width; x++) {
-    for(int y = 0; y < cod_window_height; y++) {
-      int offset = (y * cod_window_width) + x;
-      int w_offset = offset * 4;
+  for(x = 0; x < cod_window_width; x++) {
+    for(y = 0; y < cod_window_height; y++) {
+      offset = (y * cod_window_width) + x;
+      w_offset = offset * 4;
 
       buffer_data[w_offset] = cod_screen->data[offset].b;
       buffer_data[w_offset+1] = cod_screen->data[offset].g;
@@ -324,8 +315,9 @@ static cod_key translate_key(unsigned char key, MSG* msg, int keyup) {
 }
 
 int cod_get_event(cod_event* cevent) {
-  memset(cevent, 0, sizeof(cod_event));
   MSG msg;
+
+  memset(cevent, 0, sizeof(cod_event));
 
   // PeekMessage is in a loop so we can skip messages with "continue"
   // but still process the message queue till we get to the end or a

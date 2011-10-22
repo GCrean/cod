@@ -4,27 +4,16 @@
 // Leaving this in ATM because of difficulty with alpha blending so far
 #define COD_PREMULTIPLIED_ALPHA 0
 
+#include <assert.h>
+#include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 #ifndef COD_PRIVATE
 # define COD_PRIVATE
 #endif
 
 #include "cod.h"
-
-// Include stb_image.c, but suppress lots of warnings and don't
-// include HDR image support
-#if defined(__clang__)
-# pragma clang diagnostic push
-# pragma clang diagnostic ignored "-Wall"
-# pragma clang diagnostic ignored "-Wextra"
-# pragma clang diagnostic ignored "-Wunused-function"
-#endif
-#define STBI_NO_HDR
-#include "stb-png.c"
-#if defined(__clang__)
-# pragma clang diagnostic pop
-#endif
 
 cod_image* cod_make_image(int width, int height) {
   cod_image* image = (cod_image*) COD_ALLOCATE(sizeof(cod_image));
@@ -57,6 +46,7 @@ static void premultiply_alpha(cod_image* image) {
 }
 #endif // COD_PREMULTIPLIED_ALPHA
 
+
 cod_image* cod_load_image(const char* path) {
   cod_image* image = 0;
   int width = 0, height = 0, components = 0;
@@ -86,6 +76,9 @@ void cod_free_image(cod_image* image) {
 
 void cod_draw_image(cod_image* src, int src_x, int src_y, int width,
                     int height, cod_image* dst, int dst_x, int dst_y) {
+  // For looping
+  int y, src_offset, dst_offset, x, alpha, inverse_alpha;
+  cod_pixel *srcp, *dstp;
 
   assert(src_x >= 0);
   assert(src_y >= 0);
@@ -100,12 +93,12 @@ void cod_draw_image(cod_image* src, int src_x, int src_y, int width,
   width = COD_MIN(dst->width - dst_x, COD_MIN(src->width - src_x, width));
   height = COD_MIN(dst->height - dst_y, COD_MIN(src->height - src_y, height));
 
-  for(int y = 0; y < height; y++) {
-    int src_offset = COD_IMAGE_OFFSET(src_x, src_y + y, src->width);
-    int dst_offset = COD_IMAGE_OFFSET(dst_x, dst_y + y, dst->width);
-    for(int x = 0; x < width; x++) {
-      cod_pixel* dstp = dst->data + dst_offset;
-      cod_pixel* srcp = src->data + src_offset;
+  for( y = 0; y < height; y++) {
+    src_offset = COD_IMAGE_OFFSET(src_x, src_y + y, src->width);
+    dst_offset = COD_IMAGE_OFFSET(dst_x, dst_y + y, dst->width);
+    for(x = 0; x < width; x++) {
+      dstp = dst->data + dst_offset;
+      srcp = src->data + src_offset;
 
 #if COD_PREMULTIPLIED_ALPHA
 
@@ -117,8 +110,8 @@ void cod_draw_image(cod_image* src, int src_x, int src_y, int width,
 #undef BLEND
 
 #else
-      int alpha = srcp->a;
-      int inverse_alpha = 255 - alpha;
+      alpha = srcp->a;
+      inverse_alpha = 255 - alpha;
 
       dstp->r = ((srcp->r * alpha) + (dstp->r * inverse_alpha)) >> 8;
       dstp->g = ((srcp->g * alpha) + (dstp->g * inverse_alpha)) >> 8;
@@ -135,6 +128,8 @@ void cod_draw_image(cod_image* src, int src_x, int src_y, int width,
 void cod_draw_image_tinted(cod_image* src, int src_x, int src_y, int width,
                            int height, cod_image* dst, int dst_x, int dst_y,
                            cod_pixel fg) {
+  int y, src_offset, dst_offset, x, alpha, inverse_alpha, tint_r, tint_g, tint_b;
+  cod_pixel *srcp, *dstp;
 
   assert(src_x >= 0);
   assert(src_y >= 0);
@@ -150,18 +145,18 @@ void cod_draw_image_tinted(cod_image* src, int src_x, int src_y, int width,
   width = COD_MIN(dst->width - dst_x, COD_MIN(src->width - src_x, width));
   height = COD_MIN(dst->height - dst_y, COD_MIN(src->height - src_y, height));
 
-  for(int y = 0; y < height; y++) {
-    int src_offset = COD_IMAGE_OFFSET(src_x, src_y + y, src->width);
-    int dst_offset = COD_IMAGE_OFFSET(dst_x, dst_y + y, dst->width);
-    for(int x = 0; x < width; x++) {
-      cod_pixel* dstp = dst->data + dst_offset;
-      cod_pixel* srcp = src->data + src_offset;
+  for(y = 0; y < height; y++) {
+    src_offset = COD_IMAGE_OFFSET(src_x, src_y + y, src->width);
+    dst_offset = COD_IMAGE_OFFSET(dst_x, dst_y + y, dst->width);
+    for(x = 0; x < width; x++) {
+      dstp = dst->data + dst_offset;
+      srcp = src->data + src_offset;
 
-      int alpha = (srcp->r + srcp->g + srcp->b) / 3;
+      alpha = (srcp->r + srcp->g + srcp->b) / 3;
 
-      int tint_r = (fg.r * srcp->r) / 255;
-      int tint_g = (fg.g * srcp->g) / 255;
-      int tint_b = (fg.b * srcp->b) / 255;
+      tint_r = (fg.r * srcp->r) / 255;
+      tint_g = (fg.g * srcp->g) / 255;
+      tint_b = (fg.b * srcp->b) / 255;
 
 #if COD_PREMULTIPLIED_ALPHA
       tint_r = (tint_r * alpha) >> 8;
@@ -174,8 +169,8 @@ void cod_draw_image_tinted(cod_image* src, int src_x, int src_y, int width,
       dstp->g = tint_g + ((dstp->g * (255 - alpha)) >> 8);
       dstp->b = tint_b + ((dstp->b * (255 - alpha)) >> 8);
 #else
-      int inverse_alpha = 255 - alpha;
-
+      inverse_alpha = 255 - alpha;
+      
       dstp->r = (((int)tint_r * alpha) + (dstp->r * inverse_alpha)) >> 8;
       dstp->g = (((int)tint_g * alpha) + (dstp->g * inverse_alpha)) >> 8;
       dstp->b = (((int)tint_b * alpha) + (dstp->b * inverse_alpha)) >> 8;
@@ -189,6 +184,7 @@ void cod_draw_image_tinted(cod_image* src, int src_x, int src_y, int width,
 
 void cod_draw_over_image(cod_image* src, int src_x, int src_y, int width,
                     int height, cod_image* dst, int dst_x, int dst_y) {
+  int y;
 
   if(!width) width = src->width;
   if(!height) height = src->height;
@@ -198,7 +194,7 @@ void cod_draw_over_image(cod_image* src, int src_x, int src_y, int width,
   width = COD_MIN(dst->width - dst_x, COD_MIN(src->width - src_x, width));
   height = COD_MIN(dst->height - dst_y, COD_MIN(src->height - src_y, height));
 
-  for(int y = 0; y < height; y++) {
+  for(y = 0; y < height; y++) {
     int src_offset = COD_IMAGE_OFFSET(src_x, src_y + y, src->width);
     int dst_offset = COD_IMAGE_OFFSET(dst_x, dst_y + y, dst->width);
     memcpy(dst->data + dst_offset, src->data + src_offset, width * COD_BYTES_PER_PIXEL);

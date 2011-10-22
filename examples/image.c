@@ -5,7 +5,10 @@
 #include "cod.h"
 
 int main(void) {
+  cod_image* cat;
+  cod_event e;
   int running = 1;
+
 
   if(!cod_open(640, 480)) {
     printf("%s\n", cod_get_error());
@@ -14,7 +17,7 @@ int main(void) {
 
   cod_set_title("image");
 
-  cod_image* cat = cod_load_image("examples/cat.png");
+  cat = cod_load_image("examples/cat.png");
   // if this is run from the examples/ directory instead of the
   // toplevel cod directory, we'll need to load it from the current directory
   if(!cat) {
@@ -25,8 +28,6 @@ int main(void) {
       return EXIT_FAILURE;
     }
   }
-
-  cod_event e;
   
   while(running) {
     while(cod_get_event(&e)) {
