@@ -52,7 +52,7 @@ cod.c: $(SRC)
 
 clean:
 	@echo -n ' RM  ';
-	rm -f $(wildcard $(OBJ) lab $(OUT) $(EXAMPLES) src/*.obj examples/*.obj)
+	rm -f $(wildcard $(OBJ) lab $(OUT) $(EXAMPLES) src/*.obj examples/*.obj examples/*.exe *.obj *.exe *.o)
 
 cleaner: clean
 	@echo -n ' RM  ';
