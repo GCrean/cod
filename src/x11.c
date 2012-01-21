@@ -38,12 +38,12 @@ int _cod_open() {
   // Get display depth
   int display_depth = DefaultDepth(display, screen);
 
-  // Create the window 
+  // Create the window
   XSetWindowAttributes attributes;
   attributes.border_pixel = attributes.background_pixel = BlackPixel(display, screen);
 
   window = XCreateWindow(display, root, 0, 0, cod_window_width, cod_window_height, 0, CopyFromParent,
-			 InputOutput, CopyFromParent, CWBackPixel | CWBorderPixel, 
+			 InputOutput, CopyFromParent, CWBackPixel | CWBorderPixel,
 			 &attributes);
 
   if(!window) {
@@ -71,49 +71,40 @@ int _cod_open() {
   sizehints->min_height = sizehints->max_height = cod_window_height;
   sizehints->flags = PMaxSize | PMinSize | USPosition;
   XSetWMNormalHints(display, window, sizehints);
-  XFree(sizehints);  
+  XFree(sizehints);
 
   // Create image that we will draw to
   gc = DefaultGC(display, screen);
   image = XCreateImage(display, CopyFromParent, display_depth, ZPixmap, 0, NULL,
 		       cod_window_width, cod_window_height, 32, 0);
 
+  image->byte_order = LSBFirst;
   if(!image) {
     COD_ERROR0("cod_open: x11: XCreateImage failed");
     return 0;
   }
 
-  x_pixels = COD_ALLOCATE(cod_window_width * cod_window_height * 4);  
+  x_pixels = COD_ALLOCATE(cod_window_width * cod_window_height * 4);
 
   image->data = (char*) x_pixels;
 
   // Tell X11 what events we care about
-  XSelectInput(display, window, 
+  XSelectInput(display, window,
 	       KeyPressMask | KeyReleaseMask | ButtonPressMask | ButtonReleaseMask | PointerMotionMask | ButtonMotionMask);
 
   // Map window and return
   XMapRaised(display, window);
 
   XFlush(display);
-  
+
   Bool auto_repeat_supported;
   // Do not generate a KeyRelease event for every KeyPress event,
   // only generate it when the user actually releases the key
+
+  // This is done to make keyboard behavior match Windows
   XkbSetDetectableAutoRepeat(display, True, &auto_repeat_supported);
 
   return 1;
-}
-
-void cod_set_title(const char* title) {
-  strncpy(window_title, title, COD_BUFFER_SIZE);
-  XTextProperty title_property;
-  // Clang generates a warning because window_title is char[512] and
-  // not char*, this suppresses that
-  char* title_ptr = (char*) window_title;
-  XStringListToTextProperty(&title_ptr, 1, &title_property);
-  XSetWMName(display, window, &title_property);
-  XFree(title_property.value);
-  XFlush(display);
 }
 
 void _cod_close() {
@@ -135,22 +126,33 @@ void _cod_close() {
     XCloseDisplay(display);
     display = 0;
   }
+}
 
-
+void cod_set_title(const char* title) {
+  strncpy(window_title, title, COD_BUFFER_SIZE);
+  XTextProperty title_property;
+  // Clang generates a warning because window_title is char[512] and
+  // not char*, this suppresses that
+  char* title_ptr = (char*) window_title;
+  XStringListToTextProperty(&title_ptr, 1, &title_property);
+  XSetWMName(display, window, &title_property);
+  XFree(title_property.value);
+  XFlush(display);
 }
 
 void cod_swap() {
   // TODO: Figure this out
-  // Convert RGBA to BGRA for x (cause apparently that's what it wants?), then write to screen
+  // Convert RGBA to BGRA for x, then write to screen
   for(int y = 0; y < cod_window_height; y++) {
     for(int x = 0; x < cod_window_width; x++) {
       int cod_offset = (y * cod_window_width) + x;
       int x_offset = cod_offset * 4;
 
+      ((int*)x_pixels)[cod_offset] = cod_screen->data[cod_offset];
       x_pixels[x_offset] = COD_PIXEL_B(cod_screen->data[cod_offset]);
       x_pixels[x_offset+1] = COD_PIXEL_G(cod_screen->data[cod_offset]);
       x_pixels[x_offset+2] = COD_PIXEL_R(cod_screen->data[cod_offset]);
-      x_pixels[x_offset+3] = 255;
+      x_pixels[x_offset+3] = 0;
     }
   }
 
@@ -265,7 +267,7 @@ static cod_key translate_key(XEvent* xevent) {
       _(KP_9, NUMPAD_9);
       _(Escape, ESCAPE);
 #undef _
-      
+
     default: return COD_KEY_UNKNOWN;
   }
 }

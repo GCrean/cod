@@ -62,37 +62,6 @@ int main(void) {
   cod_event e;
   int running = 1, update=0;
 
-  printf("playing with pixels\n");
-  cod_pixel cafebabe = COD_MAKE_PIXEL(0xca, 0xfe, 0xba, 0xbe);
-  printf("%x %x %x %x\n", COD_PIXEL_R(cafebabe), COD_PIXEL_G(cafebabe), COD_PIXEL_B(cafebabe), COD_PIXEL_A(cafebabe));
-
-  struct test_pixel test;
-
-  test.r = 0xca;
-  test.g = 0xfe;
-  test.b = 0xba;
-  test.a = 0xbe;
-
-  printf("%x\n", cafebabe);
-
-  printf("%x\n", (*((int*)&test)));
-
-  COD_PIXEL_SET_R(cafebabe, 0xeb);
-  COD_PIXEL_SET_G(cafebabe, 0xab);
-  COD_PIXEL_SET_B(cafebabe, 0xef);
-  COD_PIXEL_SET_A(cafebabe, 0xac);
-
-  test.r = 0xeb;
-  test.g = 0xab;
-  test.b = 0xef;
-  test.a = 0xac;
-
-  printf("%x\n", cafebabe);
-
-  printf("%x\n", (*((cod_pixel*)&test)));
-
-  printf("%x %x %x %x\n", COD_PIXEL_R(cafebabe), COD_PIXEL_G(cafebabe), COD_PIXEL_B(cafebabe), COD_PIXEL_A(cafebabe));
-
   if(!cod_open(640, 480)) {
     printf("%s\n", cod_get_error());
     return EXIT_FAILURE;

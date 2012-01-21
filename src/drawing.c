@@ -102,9 +102,9 @@ void cod_fill_circle(cod_image* image, cod_pixel fg, int cx, int cy, int radius)
   int offset_a, offset_b;
   for(dy = 1; dy <= r; dy += 1.0) {
     dx = floor(sqrt((2.0 * r * dy) - (dy * dy)));
-    x = cx - dx;
-    offset_a = COD_IMAGE_OFFSET(x, cy + r - dy, image->width);
-    offset_b = COD_IMAGE_OFFSET(x, cy - r + dy, image->width);
+    x = (int)(cx - dx);
+    offset_a = COD_IMAGE_OFFSET(x, (int)(cy + r - dy), image->width);
+    offset_b = COD_IMAGE_OFFSET(x, (int)(cy - r + dy), image->width);
     for(; x <= cx + dx; x++) {
       image->data[offset_a] = fg;
       image->data[offset_b] = fg;

@@ -43,6 +43,11 @@ void cod_free_image(cod_image* image) {
   free(image);
 }
 
+// Should be a macro, later on
+void COD_DRAW_IMAGE() {
+
+}
+
 void cod_draw_image(cod_image* src, int src_x, int src_y, int width,
                     int height, cod_image* dst, int dst_x, int dst_y) {
   // For looping
@@ -134,25 +139,6 @@ void cod_draw_image_tinted(cod_image* src, cod_pixel fg, int src_x, int src_y, i
       ++src_offset;
       ++dst_offset;
     }
-  }
-}
-
-void cod_draw_over_image(cod_image* src, int src_x, int src_y, int width,
-                    int height, cod_image* dst, int dst_x, int dst_y) {
-  int y;
-
-  if(!width) width = src->width;
-  if(!height) height = src->height;
-
-  // Here we truncate the dimensions of the image if it extends over
-  // the borders of the source or destination
-  width = COD_MIN(dst->width - dst_x, COD_MIN(src->width - src_x, width));
-  height = COD_MIN(dst->height - dst_y, COD_MIN(src->height - src_y, height));
-
-  for(y = 0; y < height; y++) {
-    int src_offset = COD_IMAGE_OFFSET(src_x, src_y + y, src->width);
-    int dst_offset = COD_IMAGE_OFFSET(dst_x, dst_y + y, dst->width);
-    memcpy(dst->data + dst_offset, src->data + src_offset, width * COD_BYTES_PER_PIXEL);
   }
 }
 

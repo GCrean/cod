@@ -195,10 +195,10 @@ void cod_swap() {
       offset = (y * cod_window_width) + x;
       w_offset = offset * 4;
 
-      buffer_data[w_offset] = cod_screen->data[offset].b;
-      buffer_data[w_offset+1] = cod_screen->data[offset].g;
-      buffer_data[w_offset+2] = cod_screen->data[offset].r;
-      buffer_data[w_offset+3] = cod_screen->data[offset].a;
+      buffer_data[w_offset] = COD_PIXEL_B(cod_screen->data[offset]);
+      buffer_data[w_offset+1] = COD_PIXEL_G(cod_screen->data[offset]);
+      buffer_data[w_offset+2] = COD_PIXEL_R(cod_screen->data[offset]);
+      buffer_data[w_offset+3] = COD_PIXEL_A(cod_screen->data[offset]);
     }
   }
   

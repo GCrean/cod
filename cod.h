@@ -205,6 +205,8 @@ const char* cod_key_name(cod_key key);
 
 ///// PIXELS
 
+// TODO: Consider BGRA -- apparently more common as underlying pixel format
+
 // Normally I wouldn't alias int, but this used to be a struct. Also,
 // it should probably be opaque...
 typedef unsigned int cod_pixel;
@@ -216,6 +218,7 @@ typedef unsigned int cod_pixel;
 #define COD_PIXEL_G(p) (((p) & 0x0000ff00) >> 8)
 #define COD_PIXEL_R(p) (((p) & 0x000000ff))
 
+// TODO: Can probably add and subtract which would presumably be faster
 #define COD_PIXEL_SET_R(loc,val) (loc) = COD_MAKE_PIXEL((val), COD_PIXEL_G(loc), COD_PIXEL_B(loc), COD_PIXEL_A(loc))
 #define COD_PIXEL_SET_G(loc,val) (loc) = COD_MAKE_PIXEL(COD_PIXEL_R(loc), (val), COD_PIXEL_B(loc), COD_PIXEL_A(loc))
 #define COD_PIXEL_SET_B(loc,val) (loc) = COD_MAKE_PIXEL(COD_PIXEL_R(loc), COD_PIXEL_G(loc), (val), COD_PIXEL_A(loc))
@@ -252,10 +255,6 @@ void cod_draw_image(cod_image* src, int src_x, int src_y, int width,
 // Tint and then draw an image
 void cod_draw_image_tinted(cod_image* src, cod_pixel fg, int src_x, int src_y, int width,
                            int height, cod_image* dst, int dst_x, int dst_y);
-
-// Faster draw with no transparency
-void cod_draw_over_image(cod_image* src, int src_x, int src_y, int width, 
-                         int height, cod_image* dst, int dst_x, int dst_y);
 
 // Draw an image directly to the screen
 void cod_simple_draw_image(cod_image* src, int dst_x, int dst_y);
