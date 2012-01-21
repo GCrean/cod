@@ -24,6 +24,9 @@ int main(void) {
         case COD_KEY_DOWN:
           printf("key down key=%s x=%d y=%d\n", cod_key_name(e.data.key_down.key), e.data.key_down.x, e.data.key_down.y);
           break;
+        case COD_KEY_UP:
+          printf("key up key=%s x=%d y=%d\n", cod_key_name(e.data.key_up.key), e.data.key_up.x, e.data.key_up.y);
+          break;
         case COD_QUIT:
           running = 0;
           break;

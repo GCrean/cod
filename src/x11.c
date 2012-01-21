@@ -1,5 +1,4 @@
-// x11.c -- cod x11 backend
-
+// x11.c - cod x11 backend
 #if COD_PLATFORM == COD_X11
 
 #include <stdio.h>
@@ -20,8 +19,6 @@ static XImage* image;
 static char window_title[COD_BUFFER_SIZE];
 static unsigned char* x_pixels;
 static Atom wm_delete_window, wm_protocols;
-
-extern int ffs(int);
 
 int _cod_open() {
   // Acquire display information
@@ -145,14 +142,14 @@ void _cod_close() {
 void cod_swap() {
   // TODO: Figure this out
   // Convert RGBA to BGRA for x (cause apparently that's what it wants?), then write to screen
-  for(int x = 0; x < cod_window_width; x++) {
-    for(int y = 0; y < cod_window_height; y++) {
+  for(int y = 0; y < cod_window_height; y++) {
+    for(int x = 0; x < cod_window_width; x++) {
       int cod_offset = (y * cod_window_width) + x;
       int x_offset = cod_offset * 4;
 
-      x_pixels[x_offset] = cod_screen->data[cod_offset].b;
-      x_pixels[x_offset+1] = cod_screen->data[cod_offset].g;
-      x_pixels[x_offset+2] = cod_screen->data[cod_offset].r;
+      x_pixels[x_offset] = COD_PIXEL_B(cod_screen->data[cod_offset]);
+      x_pixels[x_offset+1] = COD_PIXEL_G(cod_screen->data[cod_offset]);
+      x_pixels[x_offset+2] = COD_PIXEL_R(cod_screen->data[cod_offset]);
       x_pixels[x_offset+3] = 255;
     }
   }

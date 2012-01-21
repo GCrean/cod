@@ -1,9 +1,4 @@
-// image.c -- cod image support
-
-// TODO: Remove this #if and switch to premultiplied alpha permanently
-// Leaving this in ATM because of difficulty with alpha blending so far
-#define COD_PREMULTIPLIED_ALPHA 0
-
+// image.c - cod image support
 #include <assert.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -52,7 +47,7 @@ void cod_draw_image(cod_image* src, int src_x, int src_y, int width,
                     int height, cod_image* dst, int dst_x, int dst_y) {
   // For looping
   int y, src_offset, dst_offset, x, alpha, inverse_alpha;
-  cod_pixel *srcp, *dstp;
+  cod_pixel srcp, dstp;
 
   assert(src_x >= 0);
   assert(src_y >= 0);
@@ -71,16 +66,21 @@ void cod_draw_image(cod_image* src, int src_x, int src_y, int width,
     src_offset = COD_IMAGE_OFFSET(src_x, src_y + y, src->width);
     dst_offset = COD_IMAGE_OFFSET(dst_x, dst_y + y, dst->width);
     for(x = 0; x < width; x++) {
-      dstp = dst->data + dst_offset;
-      srcp = src->data + src_offset;
+      dstp = *(dst->data + dst_offset);
+      srcp = *(src->data + src_offset);
 
-      alpha = srcp->a;
+      alpha = COD_PIXEL_A(srcp);
       inverse_alpha = 255 - alpha;
 
-      dstp->r = ((srcp->r * alpha) + (dstp->r * inverse_alpha)) >> 8;
-      dstp->g = ((srcp->g * alpha) + (dstp->g * inverse_alpha)) >> 8;
-      dstp->b = ((srcp->b * alpha) + (dstp->b * inverse_alpha)) >> 8;
-      dstp->a = srcp->a;
+      // TODO: FIXME after turning into int
+      cod_pixel result = COD_MAKE_PIXEL(                                     \
+        ((COD_PIXEL_R(srcp) * alpha) + (COD_PIXEL_R(dstp) * inverse_alpha)) >> 8, \
+        ((COD_PIXEL_G(srcp) * alpha) + (COD_PIXEL_G(dstp) * inverse_alpha)) >> 8, \
+        ((COD_PIXEL_B(srcp) * alpha) + (COD_PIXEL_B(dstp) * inverse_alpha)) >> 8, \
+        alpha \
+      );
+
+      *(dst->data + dst_offset) = result;
 
       ++src_offset;
       ++dst_offset;
@@ -91,7 +91,7 @@ void cod_draw_image(cod_image* src, int src_x, int src_y, int width,
 void cod_draw_image_tinted(cod_image* src, cod_pixel fg, int src_x, int src_y, int width,
                            int height, cod_image* dst, int dst_x, int dst_y) {
   int y, src_offset, dst_offset, x, alpha, inverse_alpha;
-  cod_pixel *srcp, *dstp;
+  cod_pixel srcp, dstp;
   float tint_r = 0, tint_g = 0, tint_b = 0;
 
   assert(src_x >= 0);
@@ -112,20 +112,24 @@ void cod_draw_image_tinted(cod_image* src, cod_pixel fg, int src_x, int src_y, i
     src_offset = COD_IMAGE_OFFSET(src_x, src_y + y, src->width);
     dst_offset = COD_IMAGE_OFFSET(dst_x, dst_y + y, dst->width);
     for(x = 0; x < width; x++) {
-      dstp = dst->data + dst_offset;
-      srcp = src->data + src_offset;
+      dstp = *(dst->data + dst_offset);
+      srcp = *(src->data + src_offset);
 
-      alpha = srcp->a;
+      alpha = COD_PIXEL_A(srcp);
 
-      tint_r = (fg.r + srcp->r) / 2.0f;
-      tint_g = (fg.g + srcp->g) / 2.0f;
-      tint_b = (fg.b + srcp->b) / 2.0f;
+      tint_r = (COD_PIXEL_R(fg) + COD_PIXEL_R(srcp)) / 2.0f;
+      tint_g = (COD_PIXEL_G(fg) + COD_PIXEL_G(srcp)) / 2.0f;
+      tint_b = (COD_PIXEL_B(fg) + COD_PIXEL_B(srcp)) / 2.0f;
 
       inverse_alpha = 255 - alpha;
-      
-      dstp->r = (((int)tint_r * alpha) + (dstp->r * inverse_alpha)) >> 8;
-      dstp->g = (((int)tint_g * alpha) + (dstp->g * inverse_alpha)) >> 8;
-      dstp->b = (((int)tint_b * alpha) + (dstp->b * inverse_alpha)) >> 8;
+
+      cod_pixel result = COD_MAKE_PIXEL(
+        (((int)tint_r * alpha) + (COD_PIXEL_R(dstp) * inverse_alpha)) >> 8,
+        (((int)tint_g * alpha) + (COD_PIXEL_G(dstp) * inverse_alpha)) >> 8,
+        (((int)tint_b * alpha) + (COD_PIXEL_B(dstp) * inverse_alpha)) >> 8,
+        COD_PIXEL_A(dstp));
+
+      *(dst->data + dst_offset) = result;
 
       ++src_offset;
       ++dst_offset;

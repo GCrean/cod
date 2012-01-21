@@ -53,7 +53,7 @@ void cod_clear_error();
 
 extern char cod_error_buffer[COD_BUFFER_SIZE];
 
-// Open a window and initializes cod. Returns 0 on failure.
+// Opens a window and initializes cod. Returns 0 on failure.
 int cod_open(int width, int height);
 // Internal, platform-specific open
 int _cod_open();
@@ -203,25 +203,33 @@ struct cod_event {
 
 const char* cod_key_name(cod_key key);
 
-///// IMAGES
+///// PIXELS
 
-// Currently this is treated as a struct of unsigned chars -- but it may become
-// an int later for speed
-typedef struct {
-  unsigned char r, g, b, a;
-} cod_pixel;
+// Normally I wouldn't alias int, but this used to be a struct. Also,
+// it should probably be opaque...
+typedef unsigned int cod_pixel;
+
+#define COD_MAKE_PIXEL(r,g,b,a) (((a)<<24) + ((b) << 16) + ((g) << 8) + (r))
+
+#define COD_PIXEL_A(p) (((p) & 0xff000000) >> 24)
+#define COD_PIXEL_B(p) (((p) & 0x00ff0000) >> 16)
+#define COD_PIXEL_G(p) (((p) & 0x0000ff00) >> 8)
+#define COD_PIXEL_R(p) (((p) & 0x000000ff))
+
+#define COD_PIXEL_SET_R(loc,val) (loc) = COD_MAKE_PIXEL((val), COD_PIXEL_G(loc), COD_PIXEL_B(loc), COD_PIXEL_A(loc))
+#define COD_PIXEL_SET_G(loc,val) (loc) = COD_MAKE_PIXEL(COD_PIXEL_R(loc), (val), COD_PIXEL_B(loc), COD_PIXEL_A(loc))
+#define COD_PIXEL_SET_B(loc,val) (loc) = COD_MAKE_PIXEL(COD_PIXEL_R(loc), COD_PIXEL_G(loc), (val), COD_PIXEL_A(loc))
+#define COD_PIXEL_SET_A(loc,val) (loc) = COD_MAKE_PIXEL(COD_PIXEL_R(loc), COD_PIXEL_G(loc), COD_PIXEL_B(loc), (val))
 
 // Bytes per pixel
 #define COD_BYTES_PER_PIXEL (sizeof(cod_pixel))
+
+///// IMAGES
 
 struct cod_image {
   int width, height;
   cod_pixel* data;
 };
-
-// Use this to construct pixels as the structure behind pixels may change later
-// FIXME: Does not work on MSVC
-#define COD_MAKE_PIXEL(r,g,b,a) {(r), (g), (b), (a)}
 
 // Get the offset of an (x,y) coordinate pair in a one-dimensional
 // array: (y * width) + x

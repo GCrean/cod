@@ -1,8 +1,8 @@
 notes.org -- todo list
 
 * Before release
-** TODO drawing primitives
-** TODO xeyes clone
+** STARTED drawing primitives
+** STARTED xeyes clone
 ** TODO documentation
 ** TODO determine best way to support MSVC
    Maybe convert to C89? Annoying but doable.

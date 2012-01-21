@@ -4,8 +4,8 @@
 
 #include "cod.h"
 
-static cod_pixel white = {255, 255, 255, 255};
-static cod_pixel orange = {237, 149, 100, 255};
+static cod_pixel white = COD_MAKE_PIXEL(255, 255, 255, 255);
+static cod_pixel orange = COD_MAKE_PIXEL(237, 149, 100, 255);
 
 int main(void) {
   cod_event e;

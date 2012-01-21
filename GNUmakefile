@@ -1,6 +1,6 @@
 ## Build flags
 CFLAGS := -g3 
-CPPFLAGS := -I. -std=c99 -DCOD_PLATFORM=COD_X11 -Wall -Wextra $(shell pkg-config --cflags x11)
+CPPFLAGS := -I. -std=gnu99 -DCOD_PLATFORM=COD_X11 -Wall -Wextra $(shell pkg-config --cflags x11)
 LDFLAGS := -lcod $(shell pkg-config --libs x11) -lm -L.
 
 ## Build variables

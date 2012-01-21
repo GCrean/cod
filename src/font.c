@@ -1,5 +1,4 @@
-// font.c -- cod font support; uses bmfont from angelcode.com
-
+// font.c - cod font support; uses bmfont from angelcode.com
 #include <assert.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -143,13 +142,12 @@ void cod_draw_char(cod_image* src, int src_x, int src_y, int width,
                            cod_pixel fg) {
   int y, src_offset, dst_offset, x, alpha, inverse_alpha;
   float tint_r, tint_g, tint_b;
-  cod_pixel *srcp, *dstp;
+  cod_pixel srcp, dstp, result;
 
   assert(src_x >= 0);
   assert(src_y >= 0);
   assert(dst_x >= 0);
   assert(dst_y >= 0);
-
 
   if(!width) width = src->width;
   if(!height) height = src->height;
@@ -161,20 +159,26 @@ void cod_draw_char(cod_image* src, int src_x, int src_y, int width,
     src_offset = COD_IMAGE_OFFSET(src_x, src_y + y, src->width);
     dst_offset = COD_IMAGE_OFFSET(dst_x, dst_y + y, dst->width);
     for(x = 0; x < width; x++) {
-      dstp = dst->data + dst_offset;
-      srcp = src->data + src_offset;
+      dstp = *(dst->data + dst_offset);
+      srcp = *(src->data + src_offset);
 
-      alpha = (srcp->r + srcp->g + srcp->b) / 3;
+      alpha = COD_PIXEL_R(srcp) + COD_PIXEL_G(srcp) + COD_PIXEL_B(srcp);
+      alpha /= 3;
 
-      tint_r = (fg.r * srcp->r) / 255;
-      tint_g = (fg.g * srcp->g) / 255;
-      tint_b = (fg.b * srcp->b) / 255;
+      tint_r = (COD_PIXEL_R(fg) * COD_PIXEL_R(srcp)) / 255;
+      tint_g = (COD_PIXEL_G(fg) * COD_PIXEL_G(srcp)) / 255;
+      tint_b = (COD_PIXEL_B(fg) * COD_PIXEL_B(srcp)) / 255;
 
       inverse_alpha = 255 - alpha;
-      
-      dstp->r = (((int)tint_r * alpha) + (dstp->r * inverse_alpha)) >> 8;
-      dstp->g = (((int)tint_g * alpha) + (dstp->g * inverse_alpha)) >> 8;
-      dstp->b = (((int)tint_b * alpha) + (dstp->b * inverse_alpha)) >> 8;
+
+      // FIXME: remove declaration
+      cod_pixel result = COD_MAKE_PIXEL(                                       \
+         (((int)tint_r * alpha) + (COD_PIXEL_R(dstp) * inverse_alpha)) >> 8, \
+         (((int)tint_g * alpha) + (COD_PIXEL_G(dstp) * inverse_alpha)) >> 8, \
+         (((int)tint_b * alpha) + (COD_PIXEL_B(dstp) * inverse_alpha)) >> 8, \
+        COD_PIXEL_A(dstp));
+
+      *(dst->data + dst_offset) = result;
 
       ++src_offset;
       ++dst_offset;

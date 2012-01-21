@@ -1,4 +1,4 @@
-// drawing.c -- drawing primitives, lines, rectangles, etc
+// drawing.c - drawing primitives, lines, rectangles, etc
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>

@@ -1,5 +1,4 @@
-// win32.c -- cod windows backend
-
+// win32.c - cod windows backend
 #if COD_PLATFORM == COD_WIN32
 
 #define UNICODE 1
