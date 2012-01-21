@@ -47,7 +47,7 @@ void cod_draw_image(cod_image* src, int src_x, int src_y, int width,
                     int height, cod_image* dst, int dst_x, int dst_y) {
   // For looping
   int y, src_offset, dst_offset, x, alpha, inverse_alpha;
-  cod_pixel srcp, dstp;
+  cod_pixel srcp, dstp, result;
 
   assert(src_x >= 0);
   assert(src_y >= 0);
@@ -73,7 +73,7 @@ void cod_draw_image(cod_image* src, int src_x, int src_y, int width,
       inverse_alpha = 255 - alpha;
 
       // TODO: FIXME after turning into int
-      cod_pixel result = COD_MAKE_PIXEL(                                     \
+      result = COD_MAKE_PIXEL(                                     \
         ((COD_PIXEL_R(srcp) * alpha) + (COD_PIXEL_R(dstp) * inverse_alpha)) >> 8, \
         ((COD_PIXEL_G(srcp) * alpha) + (COD_PIXEL_G(dstp) * inverse_alpha)) >> 8, \
         ((COD_PIXEL_B(srcp) * alpha) + (COD_PIXEL_B(dstp) * inverse_alpha)) >> 8, \
@@ -91,7 +91,7 @@ void cod_draw_image(cod_image* src, int src_x, int src_y, int width,
 void cod_draw_image_tinted(cod_image* src, cod_pixel fg, int src_x, int src_y, int width,
                            int height, cod_image* dst, int dst_x, int dst_y) {
   int y, src_offset, dst_offset, x, alpha, inverse_alpha;
-  cod_pixel srcp, dstp;
+  cod_pixel srcp, dstp, result;
   float tint_r = 0, tint_g = 0, tint_b = 0;
 
   assert(src_x >= 0);
@@ -123,7 +123,7 @@ void cod_draw_image_tinted(cod_image* src, cod_pixel fg, int src_x, int src_y, i
 
       inverse_alpha = 255 - alpha;
 
-      cod_pixel result = COD_MAKE_PIXEL(
+      result = COD_MAKE_PIXEL(
         (((int)tint_r * alpha) + (COD_PIXEL_R(dstp) * inverse_alpha)) >> 8,
         (((int)tint_g * alpha) + (COD_PIXEL_G(dstp) * inverse_alpha)) >> 8,
         (((int)tint_b * alpha) + (COD_PIXEL_B(dstp) * inverse_alpha)) >> 8,

@@ -171,8 +171,7 @@ void cod_draw_char(cod_image* src, int src_x, int src_y, int width,
 
       inverse_alpha = 255 - alpha;
 
-      // FIXME: remove declaration
-      cod_pixel result = COD_MAKE_PIXEL(                                       \
+      result = COD_MAKE_PIXEL(                                          \
          (((int)tint_r * alpha) + (COD_PIXEL_R(dstp) * inverse_alpha)) >> 8, \
          (((int)tint_g * alpha) + (COD_PIXEL_G(dstp) * inverse_alpha)) >> 8, \
          (((int)tint_b * alpha) + (COD_PIXEL_B(dstp) * inverse_alpha)) >> 8, \
