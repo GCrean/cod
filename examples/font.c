@@ -7,8 +7,8 @@
 #include "cod.h"
 
 static int yoffset = 0;
-static cod_pixel white = {255, 255, 255, 255};
-static cod_pixel blue = {0, 0, 255, 255};
+static cod_pixel white = COD_MAKE_PIXEL(255, 255, 255, 255);
+static cod_pixel blue = COD_MAKE_PIXEL(0, 0, 255, 255);
 
 static void font_demo(const char* path, cod_pixel fg) {
   char fnt_buffer[COD_BUFFER_SIZE];
