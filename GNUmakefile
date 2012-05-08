@@ -49,6 +49,7 @@ cod.c: cod.h $(SRC)
 	echo "#ifdef COD_LINK" >> $@
 	cat $(SRC) >> $@
 	echo "#endif // COD_LINK" >> $@
+	sed -e "s/#include \"cod.h\"//g;" -i $@
 
 ## Utilities
 .PHONY: clean cleaner cloc cod.c
