@@ -3,10 +3,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#ifndef COD_PRIVATE
-# define COD_PRIVATE
-#endif
-
 #include "cod.h"
 
 #define COD_GET_CHAR(font, c) font->chars[c-32]

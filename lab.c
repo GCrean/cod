@@ -3,9 +3,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#define COD_PRIVATE
-
-#include "cod.h"
+#define COD_LINK
+#include "cod.c"
 
 #define center(src, dst) ((dst / 2) - (src / 2))
 

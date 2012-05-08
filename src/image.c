@@ -4,11 +4,6 @@
 #include <stdlib.h>
 #include <string.h>
 
-// ifndef is used in case all files are amalgamated into cod.c
-#ifndef COD_PRIVATE
-# define COD_PRIVATE
-#endif
-
 #include "cod.h"
 
 cod_image* cod_make_image(int width, int height) {

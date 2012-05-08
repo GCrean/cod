@@ -12,7 +12,7 @@ DEP := $(patsubst src/%.c,src/.%.d, $(SRC))
 EXAMPLES := examples/font examples/eyes examples/events examples/image examples/primitives examples/skeleton 
 
 # Source code for counting lines of code in the whole codebase
-CLOC_SRC := $(SRC) src/win32.c src/cod.h
+CLOC_SRC := $(SRC) src/win32.c cod.h
 
 ## Local settings
 -include site.mk
@@ -44,11 +44,14 @@ $(OUT): $(OBJ)
 	$(strip ar rcs $@ $^)
 
 # Creates amalgamated file of all sources for ease of distribution
-cod.c: $(SRC)
-	cat $^ > $@
+cod.c: cod.h $(SRC)
+	cat cod.h > $@
+	echo "#ifdef COD_LINK" >> $@
+	cat $(SRC) >> $@
+	echo "#endif // COD_LINK" >> $@
 
 ## Utilities
-.PHONY: clean cleaner cloc
+.PHONY: clean cleaner cloc cod.c
 
 clean:
 	@echo -n ' RM  ';

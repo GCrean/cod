@@ -18,10 +18,13 @@ extern "C" {
 #define COD_WIN32 2
 #define COD_COCOA 3
 
-#ifndef COD_PLATFORM
-# ifdef _MSC_VER
+#ifdef _MSC_VER
+# define COD_SNPRINTF(buffer, size, ...) _snprintf_s((buffer), (size), _countof((buffer)), __VA_ARGS__)
+# ifndef COD_PLATFORM
 #  define COD_PLATFORM COD_WIN32
 # endif
+#else
+# define COD_SNPRINTF(buffer, size, ...) snprintf((buffer), (size), __VA_ARGS__)
 #endif
 
 ///// MAIN
@@ -44,8 +47,8 @@ extern cod_image* cod_screen;
 #define COD_ALLOCATE(x) (calloc(1, (x)))
 
 // Errors
-#define COD_ERROR(fmt, ...) snprintf(cod_error_buffer, COD_BUFFER_SIZE, "cod: "fmt, __VA_ARGS__)
-#define COD_ERROR0(fmt) snprintf(cod_error_buffer, COD_BUFFER_SIZE, "cod: "fmt)
+#define COD_ERROR(fmt, ...) COD_SNPRINTF(cod_error_buffer, COD_BUFFER_SIZE, "cod: "fmt, __VA_ARGS__)
+#define COD_ERROR0(fmt) COD_SNPRINTF(cod_error_buffer, COD_BUFFER_SIZE, "cod: "fmt)
 
 // If cod generates an error message, this will return it
 const char* cod_get_error();
@@ -300,15 +303,9 @@ void cod_draw_text(cod_font* font, const char* text, cod_pixel fg,
                    cod_image *target, int dstx, int dsty);
 void cod_free_font(cod_font* font);
 
-#ifdef COD_PRIVATE
 // Declare these here so we don't have to include stb-png.c directly
 extern unsigned char* stbi_load(const char*, int*, int*, int*, int);
 extern const char* stbi_failure_reason(void);
-
-# ifdef _MSC_VER
-#  define snprintf(buffer, size, ...) _snprintf_s((buffer), (size), _countof((buffer)), __VA_ARGS__)
-# endif
-#endif
 
 #ifdef __cplusplus
 } // extern "C"

@@ -35,6 +35,7 @@ void cod_clear_error() {
 
 int cod_open(int width, int height) {
   assert(sizeof(cod_pixel) == sizeof(int));
+  assert(sizeof(int) == 4);
 
   cod_window_width = width;
   cod_window_height = height;

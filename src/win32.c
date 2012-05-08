@@ -3,10 +3,6 @@
 
 #define UNICODE 1
 
-#ifndef COD_PRIVATE
-# define COD_PRIVATE
-#endif
-
 #include <assert.h>
 #include <fcntl.h>
 #include <io.h>

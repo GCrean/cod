@@ -143,10 +143,11 @@ void cod_set_title(const char* title) {
 void cod_swap() {
   // TODO: Figure this out
   // Convert RGBA to BGRA for x, then write to screen
-  for(int y = 0; y < cod_window_height; y++) {
-    for(int x = 0; x < cod_window_width; x++) {
-      int cod_offset = (y * cod_window_width) + x;
-      int x_offset = cod_offset * 4;
+  int y,x,cod_offset,x_offset;
+  for(y = 0; y < cod_window_height; y++) {
+    for(x = 0; x < cod_window_width; x++) {
+      cod_offset = (y * cod_window_width) + x;
+      x_offset = cod_offset * 4;
 
       ((int*)x_pixels)[cod_offset] = cod_screen->data[cod_offset];
       x_pixels[x_offset] = COD_PIXEL_B(cod_screen->data[cod_offset]);
