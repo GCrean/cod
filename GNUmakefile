@@ -47,7 +47,13 @@ $(OUT): $(OBJ)
 cod.c: cod.h $(SRC)
 	cat cod.h > $@
 	echo "#ifdef COD_LINK" >> $@
+	echo "#ifdef __cplusplus" >> $@
+	echo "extern \"C\" {" >> $@
+	echo "#endif" >> $@
 	cat $(SRC) >> $@
+	echo "#ifdef __cplusplus" >> $@
+	echo "}" >> $@
+	echo "#endif" >> $@
 	echo "#endif // COD_LINK" >> $@
 	sed -e "s/#include \"cod.h\"//g;" -i $@
 

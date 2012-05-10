@@ -84,7 +84,7 @@ int _cod_open() {
     return 0;
   }
 
-  x_pixels = COD_ALLOCATE(cod_window_width * cod_window_height * 4);
+  x_pixels = (unsigned char*) COD_ALLOCATE(cod_window_width * cod_window_height * 4);
 
   image->data = (char*) x_pixels;
 
@@ -161,7 +161,7 @@ void cod_swap() {
   XFlush(display);
 }
 
-extern int usleep(int);
+extern int usleep(unsigned int);
 
 void cod_sleep(int milliseconds) {
   usleep(milliseconds * 1000);

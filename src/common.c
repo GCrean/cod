@@ -60,7 +60,7 @@ void cod_clear(void) {
 }
 
 ///// EVENT HANDLING
-static char* key_names[] = {
+static const char* key_names[] = {
 #define COD_KEY_DECL(X) #X,
   COD_DECLARE_KEYS(COD_KEY_DECL)
   "KEY_UNKNOWN",
