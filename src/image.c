@@ -20,7 +20,7 @@ cod_image* cod_load_image(const char* path) {
   unsigned char* data = stbi_load(path, &width, &height, &components, 4);
 
   if(!data) {
-    COD_ERROR("cod_load_image: stbi_load failed to load \"%s\": %s ", path, stbi_failure_reason());
+    COD_ERROR("cod_load_image: stbi_load failed to load '%s': %s ", path, stbi_failure_reason());
     return NULL;
   }
 
