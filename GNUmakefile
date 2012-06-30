@@ -43,8 +43,11 @@ $(OUT): $(OBJ)
 	@echo -n ' AR  ';
 	$(strip ar rcs $@ $^)
 
+## Utilities
+.PHONY: clean cleaner cloc cod-all.h
+
 # Creates amalgamated file of all sources for ease of distribution
-cod.c: cod.h $(SRC)
+cod-all.h: cod.h $(SRC)
 	cat cod.h > $@
 	echo "#ifdef COD_LINK" >> $@
 	echo "#ifdef __cplusplus" >> $@
@@ -56,9 +59,6 @@ cod.c: cod.h $(SRC)
 	echo "#endif" >> $@
 	echo "#endif // COD_LINK" >> $@
 	sed -e "s/#include \"cod.h\"//g;" -i $@
-
-## Utilities
-.PHONY: clean cleaner cloc cod.c
 
 clean:
 	@echo -n ' RM  ';

@@ -14,7 +14,7 @@
 
 static Display* display = 0;
 static Window window = 0;
-static GC gc;
+static GC cgc;
 static XImage* image;
 static char window_title[COD_BUFFER_SIZE];
 static unsigned char* x_pixels;
@@ -74,7 +74,7 @@ int _cod_open() {
   XFree(sizehints);
 
   // Create image that we will draw to
-  gc = DefaultGC(display, screen);
+  cgc = DefaultGC(display, screen);
   image = XCreateImage(display, CopyFromParent, display_depth, ZPixmap, 0, NULL,
 		       cod_window_width, cod_window_height, 32, 0);
 
@@ -149,7 +149,6 @@ void cod_swap() {
       cod_offset = (y * cod_window_width) + x;
       x_offset = cod_offset * 4;
 
-      ((int*)x_pixels)[cod_offset] = cod_screen->data[cod_offset];
       x_pixels[x_offset] = COD_PIXEL_B(cod_screen->data[cod_offset]);
       x_pixels[x_offset+1] = COD_PIXEL_G(cod_screen->data[cod_offset]);
       x_pixels[x_offset+2] = COD_PIXEL_R(cod_screen->data[cod_offset]);
@@ -157,7 +156,7 @@ void cod_swap() {
     }
   }
 
-  XPutImage(display, window, gc, image, 0, 0, 0, 0, cod_window_width, cod_window_height);
+  XPutImage(display, window, cgc, image, 0, 0, 0, 0, cod_window_width, cod_window_height);
   XFlush(display);
 }
 

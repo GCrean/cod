@@ -281,7 +281,7 @@ void cod_fill_bordered_rect(cod_image* image, cod_pixel border, cod_pixel fill, 
 ///// FONTS
 
 typedef struct {
-  int initialized;
+  unsigned char initialized;
   // Char's position in the font texture
   int x, y;
   // Width of character
@@ -293,6 +293,7 @@ typedef struct {
 } cod_char;
 
 typedef struct {
+  unsigned int char_count;
   cod_image* image;
   cod_char chars[1];
 } cod_font;

@@ -106,7 +106,8 @@ cod_font* cod_load_font(const char* fnt_path, const char* png_path) {
   }
 
   // Allocate the font
-  font = (cod_font*) COD_ALLOCATE(sizeof(cod_font) + (sizeof(cod_char) * 223));
+  font = (cod_font*) COD_ALLOCATE(sizeof(cod_font) + (sizeof(cod_char) * 254));
+  font->char_count = 255;
 
   // Hand them off to the real loading routine, then clean up after it
   if(_cod_load_font(file, font, fnt_path, png_path) == NULL) {
