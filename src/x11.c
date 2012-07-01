@@ -90,7 +90,7 @@ int _cod_open() {
 
   // Tell X11 what events we care about
   XSelectInput(display, window,
-	       KeyPressMask | KeyReleaseMask | ButtonPressMask | ButtonReleaseMask | PointerMotionMask | ButtonMotionMask);
+	       KeyPressMask | KeyReleaseMask | ButtonPressMask | ButtonReleaseMask | PointerMotionMask | ButtonMotionMask | FocusChangeMask | ExposureMask);
 
   // Map window and return
   XMapRaised(display, window);
@@ -291,6 +291,7 @@ int cod_get_event(cod_event* cevent) {
   memset(cevent, 0, sizeof(cod_event));
   XEvent xevent;
 
+  // NOTE: Make sure to change XSelectInput if you want more events
   if(XPending(display)) {
     XNextEvent(display, &xevent);
     switch(xevent.type) {
@@ -309,6 +310,15 @@ int cod_get_event(cod_event* cevent) {
       case KeyRelease:
         cevent->type = COD_KEY_UP;
         cevent->data.key_down.key = translate_key(&xevent);
+        return 1;
+      case FocusIn:
+        cevent->type = COD_FOCUS;
+        return 1;
+      case FocusOut:
+        cevent->type = COD_UNFOCUS;
+        return 1;
+      case Expose:
+        cevent->type = COD_REDRAW;
         return 1;
       case ClientMessage:
         if(xevent.xclient.message_type == wm_protocols &&

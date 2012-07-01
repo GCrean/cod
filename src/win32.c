@@ -110,7 +110,6 @@ int _cod_open() {
   window_class.hCursor = LoadCursor(NULL, IDC_ARROW);
   // No icon, background, or menu name
 
-
   window_class.lpszClassName = window_class_name;
 
   if(!RegisterClassEx(&window_class)) {
@@ -121,7 +120,8 @@ int _cod_open() {
 
   window = CreateWindow
     (window_class_name, window_class_name, 
-     WS_OVERLAPPED | WS_CAPTION | WS_SYSMENU | WS_THICKFRAME,
+     (WS_OVERLAPPEDWINDOW | WS_SYSMENU) & ~(WS_MINIMIZEBOX | WS_MAXIMIZEBOX | WS_THICKFRAME),
+     //     WS_OVERLAPPED | WS_CAPTION | WS_SYSMENU | WS_THICKFRAME,
      // Position
      0, 0,
      // Dimensions
@@ -341,9 +341,18 @@ int cod_get_event(cod_event* cevent) {
       // using our own custom dispatching, so we just translate to Cod events and
       // give control back to the main loop
       switch(msg.message) {
-          // Just completely ignore paint messages, we'll be painting
-          // when we feel like it thank you very much
+        case WM_SETFOCUS:
+          cevent->type = COD_FOCUS;
+          DefWindowProc(msg.hwnd, msg.message, msg.wParam, msg.lParam);
+          return 1;
+        case WM_KILLFOCUS:
+          cevent->type = COD_UNFOCUS;
+          DefWindowProc(msg.hwnd, msg.message, msg.wParam, msg.lParam);
+          return 1;
         case WM_PAINT:
+          cevent->type = COD_REDRAW;
+          DefWindowProc(msg.hwnd, msg.message, msg.wParam, msg.lParam);
+          return 1;
           // WM_SETCURSOR is called for every WM_MOUSEMOVE? 
         case WM_SETCURSOR:
           continue;

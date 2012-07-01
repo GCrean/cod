@@ -1,3 +1,7 @@
+// Copyright (c) 2011-2012 ioddly
+// Website: <http://ioddly.com/projects/cod/>
+// Released under the Boost Software License:
+// <http://www.boost.org/LICENSE_1_0.txt>
 #ifndef COD_H
 #define COD_H
 
@@ -89,7 +93,10 @@ typedef enum {
   COD_QUIT = 1,
   COD_KEY_DOWN = 2,
   COD_KEY_UP = 3,
-  COD_MOUSE_MOTION
+  COD_MOUSE_MOTION = 4,
+  COD_FOCUS = 5,
+  COD_UNFOCUS = 6,
+  COD_REDRAW = 7
 } cod_event_type;
 
 // Keys are declared in a macro like this so we can convert them to strings in common.c
@@ -206,14 +213,7 @@ struct cod_event {
       int x, y;
       // Actual key
       cod_key key;
-    } key_down;
-
-    struct {
-      // For mouse button releases
-      int x, y;
-      // Actual key
-      cod_key key;
-    } key_up;
+    } key_down, key_up;
 
     struct {
       int x, y;

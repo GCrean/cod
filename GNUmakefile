@@ -10,7 +10,7 @@ OUT := libcod.a
 SRC := src/common.c src/drawing.c src/font.c src/image.c src/stb-png.c src/x11.c
 OBJ := $(patsubst src/%.c,src/.%.o, $(SRC))
 DEP := $(patsubst src/%.c,src/.%.d, $(SRC))
-EXAMPLES := examples/font examples/eyes examples/events examples/image examples/primitives examples/skeleton
+EXAMPLES := examples/font examples/eyes examples/image examples/primitives examples/skeleton
 
 # Source code for counting lines of code in the whole codebase
 CLOC_SRC := $(SRC) src/win32.c cod.h

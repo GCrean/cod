@@ -38,11 +38,6 @@ void cod_free_image(cod_image* image) {
   free(image);
 }
 
-// Should be a macro, later on
-void COD_DRAW_IMAGE() {
-
-}
-
 void cod_draw_image(cod_image* src, int src_x, int src_y, int width,
                     int height, cod_image* dst, int dst_x, int dst_y) {
   // For looping

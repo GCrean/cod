@@ -9,9 +9,6 @@
 
 #include "cod.h"
 
-#define X(t) (sin(t)+1) * width * 0.5     // macro for X(t)
-#define Y(t) (cos(t)+1) * height * 0.5    // macro for Y(t)
-
 // Declare setAppleMenu
 @interface CodView : NSView<NSWindowDelegate> {
 
@@ -23,13 +20,17 @@ static NSWindow* window = 0;
 static CodView* view = 0;
 static NSAutoreleasePool* pool = 0;
 static NSBitmapImageRep* cocoa_pixels = 0;
-static char received_terminate = 0;
+static char received_terminate = 0, sent_quit = 0, received_draw = 1;
 
 @implementation CodView
 -(void) drawRect: (NSRect) rect {
-  [NSGraphicsContext saveGraphicsState];
-  [cocoa_pixels drawInRect: rect];
-  [NSGraphicsContext restoreGraphicsState];
+  NSLog(@"drawRect called");
+  received_draw = 1;
+  if(!received_terminate) {
+    [NSGraphicsContext saveGraphicsState];
+    [cocoa_pixels drawInRect: rect];
+    [NSGraphicsContext restoreGraphicsState];
+  }
 }
 
 -(void) windowWillClose: (NSNotification*) notification {
@@ -67,7 +68,7 @@ int _cod_open() {
 
   window = [[NSWindow alloc]
     initWithContentRect: rect
-              styleMask: NSTitledWindowMask
+              styleMask: NSTitledWindowMask | NSClosableWindowMask
                 backing: NSBackingStoreBuffered
                   defer: NO];
   
@@ -104,7 +105,7 @@ int _cod_open() {
 }
 
 void _cod_close() {
-  received_terminate = 0;
+  received_terminate = sent_quit = 0;
   [NSApp terminate: view];
   [view release];
   [window release];
@@ -113,25 +114,29 @@ void _cod_close() {
 }
 
 void cod_swap() {
-  [pool release];
-  pool = [[NSAutoreleasePool alloc] init];
+  if(!received_terminate) {
+    [pool release];
+    pool = [[NSAutoreleasePool alloc] init];
 
-  int y, x, offset, coffset;
-  unsigned char* pixels = (unsigned char*) [cocoa_pixels bitmapData];
+    int y, x, offset, coffset;
+    unsigned char* pixels = (unsigned char*) [cocoa_pixels bitmapData];
+
   
-  for(y = 0; y < cod_window_height; y++) {
-    for(x = 0; x < cod_window_width; x++) {
-      offset = (y * cod_window_width) + x;
-      coffset = offset * 4;
-      pixels[coffset] = COD_PIXEL_R(cod_screen->data[offset]);
-      pixels[coffset+1] = COD_PIXEL_G(cod_screen->data[offset]);
-      pixels[coffset+2] = COD_PIXEL_B(cod_screen->data[offset]);
-      pixels[coffset+3] = COD_PIXEL_A(cod_screen->data[offset]);
+    for(y = 0; y < cod_window_height; y++) {
+      for(x = 0; x < cod_window_width; x++) {
+        offset = (y * cod_window_width) + x;
+        coffset = offset * 4;
+        pixels[coffset] = COD_PIXEL_R(cod_screen->data[offset]);
+        pixels[coffset+1] = COD_PIXEL_G(cod_screen->data[offset]);
+        pixels[coffset+2] = COD_PIXEL_B(cod_screen->data[offset]);
+        pixels[coffset+3] = COD_PIXEL_A(cod_screen->data[offset]);
+      }
     }
-  }
 
-  NSRect rect = NSMakeRect(0, 0, cod_window_width, cod_window_height);
-  [view drawRect: [view bounds]];
+    [NSGraphicsContext saveGraphicsState];
+    [cocoa_pixels drawInRect: [view bounds]];
+    [NSGraphicsContext restoreGraphicsState];
+  }
 }
 
 void cod_set_title(const char* title) {
@@ -141,11 +146,20 @@ void cod_set_title(const char* title) {
 }
 
 int cod_get_event(cod_event* e) {
-  [pool drain];
+  [pool release];
   pool = [[NSAutoreleasePool alloc] init];
   
-  if(received_terminate) {
+  if(received_terminate && !sent_quit) {
     e->type = COD_QUIT;
+    sent_quit = 1;
+    return 1;
+  } else if(sent_quit) {
+    return 0;
+  }
+
+  if(received_draw) {
+    e->type = COD_REDRAW;
+    received_draw = 0;
     return 1;
   }
 
@@ -161,17 +175,24 @@ int cod_get_event(cod_event* e) {
       e->data.key_down.key = translate_key([event keyCode]);
       return 1;
       break;
-#define mevent(type_, key_) { \
-        e->type = (type_); \
-        e->data.key_down.key = (key_); \
-        NSPoint point = [event locationInWindow]; \
-        e->data.key_down.x = (int) point.x;             \
-        e->data.key_down.y = cod_window_height - (int) point.y; }
+#define mevent(type_, key_) {                                     \
+        e->type = (type_);                                        \
+        e->data.key_down.key = (key_);                            \
+        NSPoint point = [event locationInWindow];                 \
+        if((cod_window_height - (int)point.y) < 0) {              \
+          [NSApp sendEvent: event];                               \
+          break;                                                  \
+        } else {                                                  \
+          e->data.key_down.x = (int) point.x;                     \
+          e->data.key_down.y = cod_window_height - (int) point.y; \
+          return 1;                                               \
+        }                                                         \
+    }
     // Mouse press
-    case NSRightMouseDown: mevent(COD_KEY_DOWN, COD_MOUSE_RIGHT); return 1;
-    case NSRightMouseUp: mevent(COD_KEY_UP, COD_MOUSE_RIGHT); return 1;
-    case NSLeftMouseUp: mevent(COD_KEY_UP, COD_MOUSE_LEFT); return 1;
-    case NSLeftMouseDown: mevent(COD_KEY_DOWN, COD_MOUSE_LEFT); return 1;
+    case NSRightMouseDown: mevent(COD_KEY_DOWN, COD_MOUSE_RIGHT); 
+    case NSRightMouseUp: mevent(COD_KEY_UP, COD_MOUSE_RIGHT); 
+    case NSLeftMouseUp: mevent(COD_KEY_UP, COD_MOUSE_LEFT); 
+    case NSLeftMouseDown: mevent(COD_KEY_DOWN, COD_MOUSE_LEFT); 
     default:
       [NSApp sendEvent: event];
       break;

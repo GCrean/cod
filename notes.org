@@ -1,27 +1,12 @@
-notes.org -- todo list
+notes.org - todo list
 
-* Before release
-** STARTED drawing primitives
-** STARTED xeyes clone
-** TODO documentation
-** TODO determine best way to support MSVC
-   Maybe convert to C89? Annoying but doable.
-** TODO fix cod_pixel to int, proper RGBA format
-** TODO go to sleep properly (when window is hidden, applications should pause)
-** TODO improve error handling (should have like cod_error_count++ for errors)
-** TODO cleanup
+** TODO modifier handling
+** TODO remove primitives, -lm
 
 * Eventually
-** TODO premultiplied alpha, proper additive color blending
-   this is just a nightmare. gonna have to sit down with a library
-   that is known to be correct (probably cairo), then make sure the
-   cod output matches it pixel-for-pixel
-** TODO port to Cocoa
-** TODO modifier handling?
-** TODO kerning
-** TODO SSE, MMX, other acronyms that might make things faster
-** TODO hardware acceleration
+** TODO use memcpy to copy to system pixels; remove as much machinery as possible between cod_screen and window bitmap
+** TODO premultiplied alpha, proper color blending
+** TODO sse, mmx, other acronyms that might make things faster
 ** TODO unicode support
-** TODO benchmarks
-** TODO support Windows command line args?
 ** TODO window icons?
+** TODO hardware acceleration
