@@ -1,0 +1,10 @@
+CFLAGS := -I. 
+CPPFLAGS := -DCOD_PLATFORM=COD_COCOA
+LDFLAGS := -framework Cocoa -lm
+
+all: examples/skeleton examples/image
+
+examples/skeleton: src/cocoa.o src/common.o src/drawing.o src/font.o src/image.o src/stb-png.o
+examples/image: src/cocoa.o src/common.o src/drawing.o src/font.o src/image.o src/stb-png.o
+
+src/cocoa.o: src/cocoa.m

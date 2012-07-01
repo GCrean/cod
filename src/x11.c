@@ -228,6 +228,21 @@ static cod_key translate_key(XEvent* xevent) {
     case XK_Up: return COD_KEY_UP_ARROW;
     case XK_Down: return COD_KEY_DOWN_ARROW;
     case XK_Right: return COD_KEY_RIGHT_ARROW;
+    case XK_F1: return COD_KEY_F1;
+    case XK_F2: return COD_KEY_F2;
+    case XK_F3: return COD_KEY_F3;
+    case XK_F4: return COD_KEY_F4;
+    case XK_F5: return COD_KEY_F5;
+    case XK_F6: return COD_KEY_F6;
+    case XK_F7: return COD_KEY_F7;
+    case XK_F8: return COD_KEY_F8;
+    case XK_F9: return COD_KEY_F9;
+    case XK_F10: return COD_KEY_F10;
+    case XK_F11: return COD_KEY_F11;
+    case XK_F12: return COD_KEY_F12;
+    case XK_F13: return COD_KEY_F13;
+    case XK_F14: return COD_KEY_F14;
+    case XK_F15: return COD_KEY_F15;
 #define _(a, b) case XK_##a: return COD_KEY_##b
       _(Control_L, LEFT_CONTROL);
       _(Control_R, RIGHT_CONTROL);

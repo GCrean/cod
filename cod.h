@@ -163,6 +163,7 @@ typedef enum {
   V(KEY_EQUAL)              \
   V(KEY_SPACE)              \
   V(KEY_ESCAPE)             \
+  V(KEY_DELETE)             \
   V(KEY_NUMPAD_0)           \
   V(KEY_NUMPAD_1)           \
   V(KEY_NUMPAD_2)           \
@@ -172,7 +173,23 @@ typedef enum {
   V(KEY_NUMPAD_6)           \
   V(KEY_NUMPAD_7)           \
   V(KEY_NUMPAD_8)           \
-  V(KEY_NUMPAD_9)           
+  V(KEY_NUMPAD_9)           \
+  V(KEY_F0)                 \
+  V(KEY_F1)                 \
+  V(KEY_F2)                 \
+  V(KEY_F3)                 \
+  V(KEY_F4)                 \
+  V(KEY_F5)                 \
+  V(KEY_F6)                 \
+  V(KEY_F7)                 \
+  V(KEY_F8)                 \
+  V(KEY_F9)                 \
+  V(KEY_F10)                \
+  V(KEY_F11)                \
+  V(KEY_F12)                \
+  V(KEY_F13)                \
+  V(KEY_F14)                \
+  V(KEY_F15) 
 
 typedef enum {
 #define COD_KEY_DECL(X) COD_##X,
@@ -207,8 +224,6 @@ struct cod_event {
 const char* cod_key_name(cod_key key);
 
 ///// PIXELS
-
-// TODO: Consider BGRA -- apparently more common as underlying pixel format
 
 // Normally I wouldn't alias int, but this used to be a struct. Also,
 // it should probably be opaque...

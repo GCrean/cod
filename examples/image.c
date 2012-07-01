@@ -28,7 +28,10 @@ int main(void) {
       return EXIT_FAILURE;
     }
   }
-  
+
+  cod_simple_draw_image(cat, 50, 50);
+  cod_swap();
+
   while(running) {
     while(cod_get_event(&e)) {
       switch(e.type) {
@@ -39,12 +42,6 @@ int main(void) {
           break;
       }
     }
-
-    cod_clear();
-
-    cod_simple_draw_image(cat, 50, 50);
-
-    cod_swap();
   }
 
   cod_free_image(cat);

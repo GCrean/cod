@@ -243,8 +243,6 @@ static cod_key translate_key(unsigned char key, MSG* msg, int keyup) {
     _(VK_SPACE, SPACE);
     _(VK_ESCAPE, ESCAPE);
     _(VK_LWIN, SUPER_L);
-
-
     _('0', 0);
     _('1', 1);
     _('2', 2);
@@ -281,6 +279,21 @@ static cod_key translate_key(unsigned char key, MSG* msg, int keyup) {
     _('X', X);
     _('Y', Y);
     _('Z', Z);
+    case VK_F1: return COD_KEY_F1;
+    case VK_F2: return COD_KEY_F2;
+    case VK_F3: return COD_KEY_F3;
+    case VK_F4: return COD_KEY_F4;
+    case VK_F5: return COD_KEY_F5;
+    case VK_F6: return COD_KEY_F6;
+    case VK_F7: return COD_KEY_F7;
+    case VK_F8: return COD_KEY_F8;
+    case VK_F9: return COD_KEY_F9;
+    case VK_F10: return COD_KEY_F10;
+    case VK_F11: return COD_KEY_F11;
+    case VK_F12: return COD_KEY_F12;
+    case VK_F13: return COD_KEY_F13;
+    case VK_F14: return COD_KEY_F14;
+    case VK_F15: return COD_KEY_F15;
 #define EXTENDED_KEYMASK (1<<24)
     case VK_SHIFT:
       // This is bizarre. And it STILL doesn't work correctly if you

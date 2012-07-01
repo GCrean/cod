@@ -9,7 +9,6 @@ int main(void) {
   int running = 1;
   cod_event e;
 
-
   if(!cod_open(640, 480)) {
     printf("%s\n", cod_get_error());
     return EXIT_FAILURE;
