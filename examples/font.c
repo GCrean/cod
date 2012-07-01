@@ -21,8 +21,8 @@ static void font_demo(const char* path, cod_pixel fg) {
   static const char* txt4 = "The quick brown fox jumps over the lazy dog.";
   static const char* txt5 = "Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt";
 
-  snprintf(fnt_buffer, COD_BUFFER_SIZE, "%s.fnt", path);
-  snprintf(png_buffer, COD_BUFFER_SIZE, "%s_0.png", path);
+  COD_SNPRINTF(fnt_buffer, COD_BUFFER_SIZE, "%s.fnt", path);
+  COD_SNPRINTF(png_buffer, COD_BUFFER_SIZE, "%s_0.png", path);
 
   font = cod_load_font(fnt_buffer, png_buffer);
   if(!font) {

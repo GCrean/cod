@@ -35,7 +35,7 @@ static void render() {
 
   cod_draw_image_tinted(cat, red, 0, 0, 0, 0, cod_screen, 400, 0);
 
-  snprintf(buffer, COD_BUFFER_SIZE, "Mouse: (%d, %d)", mouse_x, mouse_y);
+  COD_SNPRINTF(buffer, COD_BUFFER_SIZE, "Mouse: (%d, %d)", mouse_x, mouse_y);
 
   cod_draw_text(proggy, buffer, black, cod_screen, 5, 5);
 
