@@ -1,15 +1,31 @@
 ## Build flags
 CFLAGS := -g3 
-CPPFLAGS := -I. -std=gnu99 -DCOD_PLATFORM=COD_X11 -Wall -Wextra $(shell pkg-config --cflags x11)
-LDFLAGS := -lcod $(shell pkg-config --libs x11) -lm -L.
+CPPFLAGS := -I. -std=gnu99 -Wall -Wextra
+LDFLAGS := -L. -lcod -lm
+
+## Source code
 
 ## Build variables
 OUT := libcod.a
-SRC := common drawing font image stb-png x11
-SRC := $(foreach x,$(SRC),src/$(x).c)
+SRC := src/common.c src/drawing.c src/font.c src/image.c src/stb-png.c
 OBJ := $(patsubst src/%.c,src/.%.o, $(SRC))
 DEP := $(patsubst src/%.c,src/.%.d, $(SRC))
 EXAMPLES := examples/font examples/eyes examples/events examples/image examples/primitives examples/skeleton 
+
+## Platform specific flags
+ifeq ($(shell uname -s),Darwin)
+	CPPFLAGS := $(CPPFLAGS) -DCOD_PLATFORM=COD_X11
+	LDFLAGS := $(LDFLAGS) -lx11 -L/usr/X11/lib
+	SRC := $(SRC) src/x11.c
+	OBJ := $(OBJ) src/.x11.o
+	DEP := $(DEP) src/.x11.d
+else
+	CPPFLAGS := $(CPPFLAGS) $(shell pkg-config --cflags x11) -DCOD_PLATFORM=COD_X11
+	LDFLAGS := $(LDFLAGS) $(shell pkg-config --libs x11)
+	SRC := $(SRC) src/x11.c
+	OBJ := $(OBJ) src/.x11.o
+	DEP := $(DEP) src/.x11.d
+endif
 
 # Source code for counting lines of code in the whole codebase
 CLOC_SRC := $(SRC) src/win32.c cod.h
@@ -23,6 +39,10 @@ src/.%.d: src/%.c
 	$(strip $(CC) $(CPPFLAGS) -MM $< -MT $(patsubst %.d,%.o,$@) > $@)
 
 src/.%.o: src/%.c
+	@echo -n ' CC  ';
+	$(strip $(CC) $(CPPFLAGS) $(CFLAGS) -c -o $@ $<)
+
+src/.%.o: src/%.m
 	@echo -n ' CC  ';
 	$(strip $(CC) $(CPPFLAGS) $(CFLAGS) -c -o $@ $<)
 

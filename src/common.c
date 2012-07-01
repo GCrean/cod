@@ -1,4 +1,4 @@
-// common.c -- misc. code
+// common.c - misc. code
 
 #include <assert.h>
 #include <stdio.h>
@@ -14,6 +14,7 @@
 
 #if COD_PLATFORM == COD_X11
 #elif COD_PLATFORM == COD_WIN32
+#elif COD_PLATFORM == COD_COCOA
 #else
 # error "COD_PLATFORM unrecognized"
 #endif
