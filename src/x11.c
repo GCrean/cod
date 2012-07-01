@@ -180,9 +180,9 @@ static cod_key translate_button(int button) {
 }
 
 static void set_button(cod_event* cevent, XEvent* xevent) {
-  cevent->data.key_down.x = xevent->xmotion.x;
-  cevent->data.key_down.y = xevent->xmotion.y;
-  cevent->data.key_down.key = translate_button(xevent->xbutton.button);
+  cevent->key_down.x = xevent->xmotion.x;
+  cevent->key_down.y = xevent->xmotion.y;
+  cevent->key_down.key = translate_button(xevent->xbutton.button);
 }
 
 static cod_key translate_key(XEvent* xevent) {
@@ -287,6 +287,20 @@ static cod_key translate_key(XEvent* xevent) {
   }
 }
 
+static unsigned char translate_modifiers(XEvent* xe) {
+  unsigned char mask = 0;
+  if(xe->xkey.state & ControlMask) {
+    mask |= COD_MOD_CONTROL;
+  }
+  if(xe->xkey.state & Mod1Mask || xe->xkey.state & Mod3Mask) {
+    mask |= COD_MOD_ALT;
+  }
+  if(xe->xkey.state & ShiftMask) {
+    mask |= COD_MOD_SHIFT;
+  }
+  return mask;
+}
+
 int cod_get_event(cod_event* cevent) {
   memset(cevent, 0, sizeof(cod_event));
   XEvent xevent;
@@ -305,11 +319,13 @@ int cod_get_event(cod_event* cevent) {
         return 1;
       case KeyPress:
         cevent->type = COD_KEY_DOWN;
-        cevent->data.key_down.key = translate_key(&xevent);
+        cevent->key_down.key = translate_key(&xevent);
+        cevent->key_down.modifiers = translate_modifiers(&xevent);
         return 1;
       case KeyRelease:
         cevent->type = COD_KEY_UP;
-        cevent->data.key_down.key = translate_key(&xevent);
+        cevent->key_down.key = translate_key(&xevent);
+        cevent->key_down.modifiers = translate_modifiers(&xevent);
         return 1;
       case FocusIn:
         cevent->type = COD_FOCUS;
@@ -336,8 +352,8 @@ int cod_get_event(cod_event* cevent) {
           return 0;
         }
         cevent->type = COD_MOUSE_MOTION;
-        cevent->data.mouse_motion.x = xevent.xmotion.x;
-        cevent->data.mouse_motion.y = xevent.xmotion.y;
+        cevent->mouse_motion.x = xevent.xmotion.x;
+        cevent->mouse_motion.y = xevent.xmotion.y;
         return 1;
       default:
         break;

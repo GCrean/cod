@@ -1,7 +1,9 @@
 notes.org - todo list
 
-** TODO modifier handling
 ** TODO remove primitives, -lm
+** TODO make key/mouse handling the same across every platform
+   e.g. look them up in arrays or do the same thing for each platform
+   not that it matters but it bugs me
 
 * Eventually
 ** TODO use memcpy to copy to system pixels; remove as much machinery as possible between cod_screen and window bitmap

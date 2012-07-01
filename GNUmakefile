@@ -7,7 +7,7 @@ LDFLAGS := -L. -lcod -lm $(shell pkg-config --libs x11)
 
 ## Build variables
 OUT := libcod.a
-SRC := src/common.c src/drawing.c src/font.c src/image.c src/stb-png.c src/x11.c
+SRC := src/common.c src/font.c src/image.c src/stb-png.c src/x11.c
 OBJ := $(patsubst src/%.c,src/.%.o, $(SRC))
 DEP := $(patsubst src/%.c,src/.%.d, $(SRC))
 EXAMPLES := examples/font examples/eyes examples/image examples/primitives examples/skeleton

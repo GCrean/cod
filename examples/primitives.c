@@ -4,6 +4,8 @@
 
 #include "cod.h"
 
+#include "extra/drawing.c"
+
 static cod_pixel white = COD_MAKE_PIXEL(255, 255, 255, 255);
 static cod_pixel orange = COD_MAKE_PIXEL(237, 149, 100, 255);
 

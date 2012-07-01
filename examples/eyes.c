@@ -7,6 +7,8 @@
 
 #include "cod.h"
 
+#include "extra/drawing.c"
+
 #define center(src, dst) ((dst / 2) - (src / 2))
 
 #define fail() \
@@ -86,8 +88,8 @@ int main(void) {
           break;
         case COD_MOUSE_MOTION:
           update = 1;
-          mouse_x = e.data.mouse_motion.x;
-          mouse_y = e.data.mouse_motion.y;
+          mouse_x = e.mouse_motion.x;
+          mouse_y = e.mouse_motion.y;
           break;
         default:
           break;

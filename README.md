@@ -7,13 +7,12 @@ compiled down to a single file for easy inclusion into your projects.
 
 [Cod on Github](http://github.com/ioddly/cod)
 
-![Cod]($url/static/cod/screenshot.png)
-
+![Screenshot](http://ioddly.com/static/cod/screenshot.png)
 _Behold the awesome graphical powers of Cod!_
 
 ## Documentation
 
-### Compiling Cod
+### Compiling
 
 To include Cod in your projects, I recommend taking advantage of the
 amalgamation feature. Simply use the following command in the cod
@@ -25,8 +24,8 @@ make cod-all.h
 
 And a file named 'cod-all.h' will be generated. Then copy this file
 into your project. To build with cod-all.h, you must define COD_LINK
-in one (and only one) source file. I recommend creating a separate
-cod.c file with the following contents:
+in one (and only one) source file that includes cod-all.h. I recommend
+creating a separate cod.c file with the following contents:
 
 ```c
 #define COD_LINK
@@ -74,11 +73,35 @@ Change the title of the window.
 ---
 
 ```c
+const char* cod_get_error(void)
+```
+
+Return a message describing the most recent error.
+
+---
+
+```c
 int cod_get_event(cod_event* event)
 ```
 
 If there's an event waiting to be processed, place it in
 event. Returns 0 if there are no events.
+
+---
+
+```c
+void cod_swap()
+```
+
+Draw to the window.
+
+---
+
+```c
+void cod_clear()
+```
+
+Black out the window.
 
 ---
 
@@ -133,3 +156,9 @@ void cod_draw_text(cod_font* font, const char* text, cod_pixel fg, cod_image* ta
 ```    
 
 Draw *text* in *font* using the color *fg* at *dstx* and *dsty* in the image *target*.
+
+#### Drawing primitives
+
+Cod does not include primitive shapes directly, but there are some
+located in extra/drawing.c. Include in your code and link -lm on
+Unix systems.

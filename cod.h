@@ -205,6 +205,10 @@ typedef enum {
 #undef COD_KEY_DECL
 } cod_key;
 
+#define COD_MOD_CONTROL (1 << 0)
+#define COD_MOD_SHIFT (1 << 1)
+#define COD_MOD_ALT (1 << 2)
+
 struct cod_event {
   cod_event_type type;
   union {
@@ -213,12 +217,14 @@ struct cod_event {
       int x, y;
       // Actual key
       cod_key key;
+      // modifiers
+      unsigned char modifiers;
     } key_down, key_up;
 
     struct {
       int x, y;
     } mouse_motion;
-  } data;
+  };
 };
 
 const char* cod_key_name(cod_key key);
@@ -280,18 +286,6 @@ void cod_simple_draw_image(cod_image* src, int dst_x, int dst_y);
 // Draw an image file directly to the screen (obviously should not be used
 // during a loop or something because it loads and then frees the image)
 void cod_simple_draw_image_path(const char* image, int dst_x, int dst_y);
-
-///// DRAWING
-
-void cod_fill(cod_image* image, cod_pixel fg);
-void cod_draw_horizontal_line(cod_image* image, cod_pixel fg, int x, int y, int width);
-void cod_draw_vertical_line(cod_image* image, cod_pixel fg, int x, int y, int height);
-void cod_draw_line(cod_image* image, cod_pixel fg, int x1, int y1, int x2, int y2);
-void cod_draw_circle(cod_image* image, cod_pixel fg, int cx, int cy, int radius);
-void cod_fill_circle(cod_image* image, cod_pixel fg, int x, int y, int radius);
-void cod_draw_rect(cod_image* image, cod_pixel fg, int x, int y, int w, int h);
-void cod_fill_rect(cod_image* image, cod_pixel fg, int x, int y, int w, int h);
-void cod_fill_bordered_rect(cod_image* image, cod_pixel border, cod_pixel fill, int x, int y, int w, int h);
 
 ///// FONTS
 

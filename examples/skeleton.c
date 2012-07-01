@@ -4,6 +4,12 @@
 
 #include "cod.h"
 
+static void print_modifiers(cod_event* e) {
+  if(e->key_down.modifiers & COD_MOD_ALT) printf("alt ");
+  if(e->key_down.modifiers & COD_MOD_CONTROL) printf("ctrl ");
+  if(e->key_down.modifiers & COD_MOD_SHIFT) printf("shift ");
+
+}
 
 int main(void) {
   int running = 1;
@@ -25,10 +31,14 @@ int main(void) {
           running = 0;
           break;
         case COD_KEY_DOWN:
-          printf("key down key=%s x=%d y=%d\n", cod_key_name(e.data.key_down.key), e.data.key_down.x, e.data.key_down.y);
+          printf("key down key=%s x=%d y=%d ", cod_key_name(e.key_down.key), e.key_down.x, e.key_down.y);
+          print_modifiers(&e);
+          putchar('\n');
           break;
         case COD_KEY_UP:
-          printf("key up key=%s x=%d y=%d\n", cod_key_name(e.data.key_up.key), e.data.key_up.x, e.data.key_up.y);
+          printf("key up key=%s x=%d y=%d ", cod_key_name(e.key_up.key), e.key_up.x, e.key_up.y);
+          print_modifiers(&e);
+          putchar('\n');
           break;
         case COD_REDRAW:
           printf("redraw\n");

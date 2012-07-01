@@ -24,7 +24,6 @@ static char received_terminate = 0, sent_quit = 0, received_draw = 1;
 
 @implementation CodView
 -(void) drawRect: (NSRect) rect {
-  NSLog(@"drawRect called");
   received_draw = 1;
   if(!received_terminate) {
     [NSGraphicsContext saveGraphicsState];
@@ -105,7 +104,7 @@ int _cod_open() {
 }
 
 void _cod_close() {
-  received_terminate = sent_quit = 0;
+  received_terminate = sent_quit = received_draw = 0;
   [NSApp terminate: view];
   [view release];
   [window release];
@@ -165,26 +164,36 @@ int cod_get_event(cod_event* e) {
 
   NSEvent* event = [NSApp nextEventMatchingMask: NSAnyEventMask untilDate: nil inMode:NSDefaultRunLoopMode dequeue: YES];
   switch([event type]) {
-    case NSKeyDown:
+    case NSKeyDown: {
       // Pass through commands
-      if([event modifierFlags] & NSCommandKeyMask) {
+      NSUInteger modifiers = [event modifierFlags];
+      if(modifiers & NSCommandKeyMask) {
         [NSApp sendEvent: event];
       }
+      e->type = COD_KEY_DOWN;
     case NSKeyUp:
-      e->type = [event type] == NSKeyDown ? COD_KEY_DOWN : COD_KEY_UP;
-      e->data.key_down.key = translate_key([event keyCode]);
+      // handle fall-through
+      if([event type] == NSKeyUp)
+        e->type = COD_KEY_UP;
+      e->key_down.key = translate_key([event keyCode]);
+      e->key_down.modifiers = 0;
+      if(modifiers & NSControlKeyMask) e->key_down.modifiers |= COD_MOD_CONTROL;
+      if(modifiers & NSAlternateKeyMask) e->key_down.modifiers |= COD_MOD_ALT;
+      if(modifiers & NSShiftKeyMask) e->key_down.modifiers |= COD_MOD_SHIFT;
+
       return 1;
-      break;
+    }
+      // Mouse event handling macro
 #define mevent(type_, key_) {                                     \
         e->type = (type_);                                        \
-        e->data.key_down.key = (key_);                            \
+        e->key_down.key = (key_);                            \
         NSPoint point = [event locationInWindow];                 \
         if((cod_window_height - (int)point.y) < 0) {              \
           [NSApp sendEvent: event];                               \
           break;                                                  \
         } else {                                                  \
-          e->data.key_down.x = (int) point.x;                     \
-          e->data.key_down.y = cod_window_height - (int) point.y; \
+          e->key_down.x = (int) point.x;                     \
+          e->key_down.y = cod_window_height - (int) point.y; \
           return 1;                                               \
         }                                                         \
     }

@@ -325,8 +325,6 @@ static cod_key translate_key(unsigned char key, MSG* msg, int keyup) {
 int cod_get_event(cod_event* cevent) {
   MSG msg;
 
-  memset(cevent, 0, sizeof(cod_event));
-
   // PeekMessage is in a loop so we can skip messages with "continue"
   // but still process the message queue till we get to the end or a
   // message we actually care about
@@ -362,18 +360,21 @@ int cod_get_event(cod_event* cevent) {
         case WM_SYSKEYUP: {
           unsigned char key = (unsigned char) msg.wParam;
           cevent->type = (msg.message == WM_KEYDOWN || msg.message == WM_SYSKEYDOWN) ? COD_KEY_DOWN : COD_KEY_UP;
-          cevent->data.key_down.key = translate_key(key, &msg, cevent->type == COD_KEY_UP);
-        
+          cevent->key_down.key = translate_key(key, &msg, cevent->type == COD_KEY_UP);
+          cevent->key_down.modifiers = 0;
+          if(GetKeyState(VK_CONTROL) < 0) cevent->key_down.modifiers |= COD_MOD_CONTROL;
+          if(GetKeyState(VK_MENU) < 0) cevent->key_down.modifiers |= COD_MOD_ALT;
+          if(GetKeyState(VK_SHIFT) < 0) cevent->key_down.modifiers |= COD_MOD_SHIFT;
           return 1;
         }
           // Mouse events
         case WM_MOUSEMOVE:
           cevent->type = COD_MOUSE_MOTION;
-          cevent->data.mouse_motion.x = GET_X_LPARAM(msg.lParam);
-          cevent->data.mouse_motion.y = GET_Y_LPARAM(msg.lParam);
+          cevent->mouse_motion.x = GET_X_LPARAM(msg.lParam);
+          cevent->mouse_motion.y = GET_Y_LPARAM(msg.lParam);
           return 1;
 
-#define mevent(_type, _key) cevent->type = (_type); cevent->data.key_down.key = (_key); cevent->data.key_down.x = GET_X_LPARAM(msg.lParam); cevent->data.key_down.y = GET_Y_LPARAM(msg.lParam); return 1;
+#define mevent(_type, _key) cevent->type = (_type); cevent->key_down.key = (_key); cevent->key_down.x = GET_X_LPARAM(msg.lParam); cevent->key_down.y = GET_Y_LPARAM(msg.lParam); return 1;
         case WM_MBUTTONUP: mevent(COD_KEY_UP, COD_MOUSE_MIDDLE);
         case WM_RBUTTONUP: mevent(COD_KEY_UP, COD_MOUSE_RIGHT);
         case WM_LBUTTONUP: mevent(COD_KEY_UP, COD_MOUSE_LEFT);
