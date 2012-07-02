@@ -186,6 +186,19 @@ static void set_button(cod_event* cevent, XEvent* xevent) {
 }
 
 static cod_key translate_key(XEvent* xevent) {
+  switch(XKeycodeToKeysym(display, xevent->xkey.keycode, 1)) {
+    case XK_KP_0:         return COD_KEY_NUMPAD_0;
+    case XK_KP_1:         return COD_KEY_NUMPAD_1;
+    case XK_KP_2:         return COD_KEY_NUMPAD_2;
+    case XK_KP_3:         return COD_KEY_NUMPAD_3;
+    case XK_KP_4:         return COD_KEY_NUMPAD_4;
+    case XK_KP_5:         return COD_KEY_NUMPAD_5;
+    case XK_KP_6:         return COD_KEY_NUMPAD_6;
+    case XK_KP_7:         return COD_KEY_NUMPAD_7;
+    case XK_KP_8:         return COD_KEY_NUMPAD_8;
+    case XK_KP_9:         return COD_KEY_NUMPAD_9;
+  }
+
   KeySym keysym = XLookupKeysym(&xevent->xkey, 0);
   switch(keysym) {
     case XK_a: return COD_KEY_A;
@@ -224,10 +237,27 @@ static cod_key translate_key(XEvent* xevent) {
     case XK_7: return COD_KEY_7;
     case XK_8: return COD_KEY_8;
     case XK_9: return COD_KEY_9;
+
+    case XK_KP_Left: 
     case XK_Left: return COD_KEY_LEFT_ARROW;
+    case XK_KP_Up:
     case XK_Up: return COD_KEY_UP_ARROW;
+    case XK_KP_Down:
     case XK_Down: return COD_KEY_DOWN_ARROW;
+    case XK_KP_Right:
     case XK_Right: return COD_KEY_RIGHT_ARROW;
+    case XK_KP_Home:
+    case XK_Home: return COD_KEY_HOME;
+    case XK_KP_Page_Up:
+    case XK_Page_Up: return COD_KEY_PAGE_UP;
+    case XK_KP_Page_Down:
+    case XK_Page_Down: return COD_KEY_PAGE_DOWN;
+    case XK_KP_End:
+    case XK_End: return COD_KEY_END;
+
+    case XK_Insert: return COD_KEY_INSERT;
+    case XK_Delete: return COD_KEY_DELETE;
+
     case XK_F1: return COD_KEY_F1;
     case XK_F2: return COD_KEY_F2;
     case XK_F3: return COD_KEY_F3;
@@ -243,45 +273,31 @@ static cod_key translate_key(XEvent* xevent) {
     case XK_F13: return COD_KEY_F13;
     case XK_F14: return COD_KEY_F14;
     case XK_F15: return COD_KEY_F15;
-#define _(a, b) case XK_##a: return COD_KEY_##b
-      _(Control_L, LEFT_CONTROL);
-      _(Control_R, RIGHT_CONTROL);
-      _(Shift_L, LEFT_SHIFT);
-      _(Shift_R, RIGHT_SHIFT);
-      _(Alt_L, LEFT_ALT);
-      // Doesnt seem to work, getting 65027, 0xfe07 or XK_ISO_Level3_Shift apparently
-      _(Alt_R, RIGHT_ALT);
-      _(ISO_Level3_Shift, RIGHT_ALT);
-
-      _(Return, ENTER);
-      _(BackSpace, BACKSPACE);
-      _(semicolon, SEMICOLON);
-      _(comma, COMMA);
-      _(period, PERIOD);
-      _(slash, SLASH);
-      _(backslash, BACKSLASH);
-      _(apostrophe, APOSTROPHE);
-      _(bracketleft, LEFT_BRACKET);
-      _(bracketright, RIGHT_BRACKET);
-      _(minus, MINUS);
-      _(equal, EQUAL);
-      _(space, SPACE);
-      _(Super_L, SUPER_L);
-      _(Tab, TAB);
-      _(Caps_Lock, CAPS_LOCK);
-      _(grave, GRAVE);
-      _(KP_0, NUMPAD_0);
-      _(KP_1, NUMPAD_1);
-      _(KP_2, NUMPAD_2);
-      _(KP_3, NUMPAD_3);
-      _(KP_4, NUMPAD_4);
-      _(KP_5, NUMPAD_5);
-      _(KP_6, NUMPAD_6);
-      _(KP_7, NUMPAD_7);
-      _(KP_8, NUMPAD_8);
-      _(KP_9, NUMPAD_9);
-      _(Escape, ESCAPE);
-#undef _
+    case XK_Control_L: return COD_KEY_LEFT_CONTROL;
+    case XK_Control_R: return COD_KEY_RIGHT_CONTROL;
+    case XK_Shift_L: return COD_KEY_LEFT_SHIFT;
+    case XK_Shift_R: return COD_KEY_RIGHT_SHIFT;
+    case XK_Alt_L: return COD_KEY_LEFT_ALT;
+    case XK_Alt_R: return COD_KEY_RIGHT_ALT;
+    case XK_ISO_Level3_Shift: return COD_KEY_RIGHT_ALT;
+    case XK_Return: return COD_KEY_ENTER;
+    case XK_BackSpace: return COD_KEY_BACKSPACE;
+    case XK_semicolon: return COD_KEY_SEMICOLON;
+    case XK_comma: return COD_KEY_COMMA;
+    case XK_period: return COD_KEY_PERIOD;
+    case XK_slash: return COD_KEY_SLASH;
+    case XK_backslash: return COD_KEY_BACKSLASH;
+    case XK_apostrophe: return COD_KEY_APOSTROPHE;
+    case XK_bracketleft: return COD_KEY_LEFT_BRACKET;
+    case XK_bracketright: return COD_KEY_RIGHT_BRACKET;
+    case XK_minus: return COD_KEY_MINUS;
+    case XK_equal: return COD_KEY_EQUAL;
+    case XK_space: return COD_KEY_SPACE;
+    case XK_Super_L: return COD_KEY_SUPER_L;
+    case XK_Tab: return COD_KEY_TAB;
+    case XK_Caps_Lock: return COD_KEY_CAPS_LOCK;
+    case XK_grave: return COD_KEY_GRAVE;
+    case XK_Escape: return COD_KEY_ESCAPE;
 
     default: return COD_KEY_UNKNOWN;
   }

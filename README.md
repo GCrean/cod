@@ -1,13 +1,15 @@
 Cod
 
 Cod is a simple library for rendering graphics and processing input on
-Windows, Linux, and OSX. It supports loading PNGs and bitmap fonts created
-by [Bitmap Font Generator](http://www.angelcode.com/products/bmfont/). It can be
-compiled down to a single file for easy inclusion into your projects.
+Windows, Linux, and OSX. It supports loading PNGs and bitmap fonts
+created by [Bitmap Font Generator](http://www.angelcode.com/products/bmfont/). It can be
+compiled down to a single file for easy inclusion into your
+projects. It is released under the [Boost Software License](http://www.boost.org/LICENSE_1_0.txt)
 
 [Cod on Github](http://github.com/ioddly/cod)
 
 ![Screenshot](http://ioddly.com/static/cod/screenshot.png)
+
 _Behold the awesome graphical powers of Cod!_
 
 ## Documentation

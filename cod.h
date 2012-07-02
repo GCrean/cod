@@ -170,7 +170,6 @@ typedef enum {
   V(KEY_EQUAL)              \
   V(KEY_SPACE)              \
   V(KEY_ESCAPE)             \
-  V(KEY_DELETE)             \
   V(KEY_NUMPAD_0)           \
   V(KEY_NUMPAD_1)           \
   V(KEY_NUMPAD_2)           \
@@ -181,6 +180,12 @@ typedef enum {
   V(KEY_NUMPAD_7)           \
   V(KEY_NUMPAD_8)           \
   V(KEY_NUMPAD_9)           \
+  V(KEY_HOME)                   \
+  V(KEY_END)                    \
+  V(KEY_PAGE_UP)                \
+  V(KEY_PAGE_DOWN)              \
+  V(KEY_DELETE)                 \
+  V(KEY_INSERT)                 \
   V(KEY_F0)                 \
   V(KEY_F1)                 \
   V(KEY_F2)                 \

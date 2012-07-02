@@ -1,10 +1,12 @@
 CFLAGS := -I. 
 CPPFLAGS := -DCOD_PLATFORM=COD_COCOA
 LDFLAGS := -framework Cocoa -lm
+OBJ := src/cocoa.o src/common.o src/font.o src/image.o src/stb-png.o
 
-all: examples/skeleton examples/image
+all: examples/font examples/image examples/skeleton
 
-examples/skeleton: src/cocoa.o src/common.o src/font.o src/image.o src/stb-png.o
-examples/image: src/cocoa.o src/common.o  src/font.o src/image.o src/stb-png.o
+examples/font: $(OBJ)
+examples/image: $(OBJ)
+examples/skeleton: $(OBJ)
 
 src/cocoa.o: src/cocoa.m

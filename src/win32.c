@@ -294,6 +294,13 @@ static cod_key translate_key(unsigned char key, MSG* msg, int keyup) {
     case VK_F13: return COD_KEY_F13;
     case VK_F14: return COD_KEY_F14;
     case VK_F15: return COD_KEY_F15;
+    case VK_INSERT: return COD_KEY_INSERT;
+    case VK_DELETE: return COD_KEY_DELETE;
+    case VK_HOME: return COD_KEY_HOME;
+    case VK_PRIOR: return COD_KEY_PAGE_UP;
+    case VK_NEXT: return COD_KEY_PAGE_DOWN;
+    case VK_END: return COD_KEY_END;
+
 #define EXTENDED_KEYMASK (1<<24)
     case VK_SHIFT:
       // This is bizarre. And it STILL doesn't work correctly if you

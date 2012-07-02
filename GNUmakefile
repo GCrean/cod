@@ -52,13 +52,13 @@ $(OUT): $(OBJ)
 .PHONY: clean cleaner cloc cod-all.h
 
 # Creates amalgamated file of all sources for ease of distribution
-cod-all.h: cod.h src/common.c src/drawing.c src/font.c src/image.c src/stb-png.c src/x11.c src/win32.c src/cocoa.m
+cod-all.h: cod.h src/common.c src/font.c src/image.c src/stb-png.c src/x11.c src/win32.c src/cocoa.m
 	cat cod.h > $@
 	echo "#ifdef COD_LINK" >> $@
 	echo "#ifdef __cplusplus" >> $@
 	echo "extern \"C\" {" >> $@
 	echo "#endif" >> $@
-	cat src/common.c src/drawing.c src/font.c src/image.c src/stb-png.c src/x11.c src/win32.c src/cocoa.m >> $@
+	cat src/common.c src/font.c src/image.c src/stb-png.c src/x11.c src/win32.c src/cocoa.m >> $@
 	echo "#ifdef __cplusplus" >> $@
 	echo "}" >> $@
 	echo "#endif" >> $@

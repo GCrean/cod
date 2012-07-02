@@ -64,7 +64,7 @@ void cod_clear(void) {
 static const char* key_names[] = {
 #define COD_KEY_DECL(X) #X,
   COD_DECLARE_KEYS(COD_KEY_DECL)
-  "KEY_UNKNOWN",
+  "KEY_UNKNOWN"
 #undef COD_KEY_DECL
 };
 

@@ -20,8 +20,6 @@ int main(void) {
     return EXIT_FAILURE;
   }
 
-  cod_set_title("skeleton");
-
   cod_swap();
   
   while(running) {
