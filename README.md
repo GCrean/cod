@@ -161,6 +161,6 @@ Draw *text* in *font* using the color *fg* at *dstx* and *dsty* in the image *ta
 
 #### Drawing primitives
 
-Cod does not include primitive shapes directly, but there are some
+Cod does not support primitive shapes and lines directly, but there are some
 located in extra/drawing.c. Include in your code and link -lm on
 Unix systems.
